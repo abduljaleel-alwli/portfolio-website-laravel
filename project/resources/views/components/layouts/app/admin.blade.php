@@ -52,8 +52,16 @@
 
                 <flux:navlist.item icon="envelope" :href="route('admin.contact-messages')"
                     :current="request()->routeIs('admin.contact-messages')" wire:navigate>
-                    {{ __('Messages') }}
+
+                    <div class="relative flex items-center gap-2">
+                        <span>{{ __('Messages') }}</span>
+
+                        <x-notifications.notification-badge
+                            :count="\App\Models\ContactMessage::whereNull('read_at')->count()" />
+                    </div>
+
                 </flux:navlist.item>
+
 
             </flux:navlist.group>
         </flux:navlist>

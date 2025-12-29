@@ -59,7 +59,7 @@ new class extends Component {
                 'phone' => ['nullable', 'string', 'max:50'],
                 'map_url' => ['nullable', 'string', 'max:500'],
                 'location' => ['nullable', 'string', 'max:255'],
-                'email_subject' => ['nullable', 'string', 'max:255'],
+                'email_subject' => ['required', 'string', 'max:255'],
                 'social_links' => ['array'],
                 'social_links.*.platform' => ['required', 'string', 'max:50'],
                 'social_links.*.url' => ['required', 'url', 'max:500'],

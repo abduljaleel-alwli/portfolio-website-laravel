@@ -115,6 +115,13 @@ public function updatedFeatures($value, $key): void
 
 <div class="space-y-6">
 
+        {{-- Page header --}}
+    @include('partials.settings-heading', [
+        'title' => __('About page'),
+        'description' => __('Manage the content displayed on the About page'),
+        'icon' => 'information-circle',
+    ])
+
     <div
     class="rounded-2xl border border-slate-200 dark:border-slate-800
            bg-white dark:bg-slate-900/90
