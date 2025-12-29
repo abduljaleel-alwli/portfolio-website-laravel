@@ -73,7 +73,7 @@
                 </p>
 
                 <p class="mt-1 text-xl sm:text-2xl font-semibold">
-                    {{ $value }}
+                    {{ $value ?? 0 }}
                 </p>
 
                 {{-- Trend --}}

@@ -44,6 +44,13 @@ new class extends Component {
     public string $keywords = '';
 
     /* =========================
+    Custom Scripts
+    ========================= */
+    public string $head_script = '';
+    public string $footer_script = '';
+
+
+    /* =========================
        Lifecycle
     ========================= */
     public function mount(SettingsService $settings): void
@@ -68,6 +75,10 @@ new class extends Component {
         // Branding (previews)
         $this->current_logo    = $settings->get('branding.logo');
         $this->current_favicon = $settings->get('branding.favicon');
+
+        // Custom Scripts
+        $this->head_script   = (string) $settings->get('scripts.head', '');
+        $this->footer_script = (string) $settings->get('scripts.footer', '');
     }
 
     /* =========================
@@ -101,6 +112,10 @@ new class extends Component {
         $settings->set('seo.meta_title', $this->meta_title, 'string', 'seo');
         $settings->set('seo.meta_description', $this->meta_description, 'text', 'seo');
         $settings->set('seo.keywords', $this->keywords, 'text', 'seo');
+
+        // Custom Scripts
+        $settings->set('scripts.head', $this->head_script, 'code', 'scripts');
+        $settings->set('scripts.footer', $this->footer_script, 'code', 'scripts');
 
         // Toast (project standard)
         $this->dispatch(
@@ -193,6 +208,7 @@ new class extends Component {
             'branding' => ['label' => __('Branding'), 'icon' => 'photo'],
             'colors'   => ['label' => __('Colors'),   'icon' => 'paint-brush'],
             'seo'      => ['label' => __('SEO'),      'icon' => 'magnifying-glass'],
+            'scripts'  => ['label' => __('Scripts'), 'icon' => 'code-bracket'],
             'system'   => ['label' => __('System'),   'icon' => 'server'],
         ] as $key => $t)
             <button
@@ -334,6 +350,48 @@ new class extends Component {
 
             </div>
         @endif
+
+        {{-- ========== SCRIPTS ========== --}}
+@if ($tab === 'scripts')
+    <div class="space-y-6">
+
+        {{-- Head Script --}}
+        <div>
+            <label class="text-xs text-slate-500">
+                {{ __('Head scripts') }}
+            </label>
+
+            <textarea
+                wire:model.defer="head_script"
+                rows="6"
+                class="textarea w-full mt-1 font-mono text-sm"
+                placeholder="<!-- Google Analytics, Meta Pixel, etc -->"></textarea>
+
+            <p class="text-xs text-slate-400 mt-1">
+                {{ __('This code will be injected inside <head>') }}
+            </p>
+        </div>
+
+        {{-- Footer Script --}}
+        <div>
+            <label class="text-xs text-slate-500">
+                {{ __('Footer scripts') }}
+            </label>
+
+            <textarea
+                wire:model.defer="footer_script"
+                rows="6"
+                class="textarea w-full mt-1 font-mono text-sm"
+                placeholder="<!-- Chat widgets, tracking scripts -->"></textarea>
+
+            <p class="text-xs text-slate-400 mt-1">
+                {{ __('This code will be injected before </body>') }}
+            </p>
+        </div>
+
+    </div>
+@endif
+
 
         {{-- ========== SYSTEM ========== --}}
         @if ($tab === 'system')

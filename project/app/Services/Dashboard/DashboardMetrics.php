@@ -205,6 +205,50 @@ class DashboardMetrics
         );
     }
 
+    public function funnel(): array
+{
+    return Cache::remember(
+        $this->cacheKey('funnel'),
+        now()->addMinutes(5),
+        fn() => [
+            'visits' => $this->totalVisits(),
+            'contacts' => $this->totalContactMessages(),
+            'whatsapp_clicks' => $this->whatsappClicks(),
+        ]
+    );
+}
+
+public function topSources(int $limit = 5)
+{
+    return Cache::remember(
+        $this->cacheKey("top_sources_{$limit}"),
+        now()->addMinutes(10),
+        fn() => DB::table('analytics_events')
+            ->select('source', DB::raw('COUNT(*) as total'))
+            ->where('event', 'contact_submitted')
+            ->groupBy('source')
+            ->orderByDesc('total')
+            ->limit($limit)
+            ->get()
+    );
+}
+
+public function isDashboardHealthy(): bool
+{
+    return $this->todayVisits() > 0 || $this->todayContacts() > 0;
+}
+
+// public function lastAdminLogin()
+// {
+//     return Cache::remember(
+//         $this->cacheKey('last_admin_login'),
+//         now()->addMinutes(5),
+//         fn() => User::role('admin')
+//             ->orderByDesc('last_login_at')
+//             ->first(['name', 'last_login_at'])
+//     );
+// }
+
 
     /* =========================
        DAILY CHART
@@ -224,6 +268,56 @@ class DashboardMetrics
                 ->get()
         );
     }
+
+    public function todayVisits(): int
+{
+    return Cache::remember(
+        $this->cacheKey('visits_today'),
+        now()->addMinutes(2),
+        fn() => DB::table('analytics_events')
+            ->where('event', 'page_view')
+            ->whereDate('created_at', today())
+            ->count()
+    );
+}
+
+public function yesterdayVisits(): int
+{
+    return Cache::remember(
+        $this->cacheKey('visits_yesterday'),
+        now()->addMinutes(2),
+        fn() => DB::table('analytics_events')
+            ->where('event', 'page_view')
+            ->whereDate('created_at', today()->subDay())
+            ->count()
+    );
+}
+
+
+public function todayContacts(): int
+{
+    return Cache::remember(
+        $this->cacheKey('contacts_today'),
+        now()->addMinutes(2),
+        fn() => DB::table('analytics_events')
+            ->where('event', 'contact_submitted')
+            ->whereDate('created_at', today())
+            ->count()
+    );
+}
+
+// public function singlePageVisits(): int
+// {
+//     return Cache::remember(
+//         $this->cacheKey('single_page_visits'),
+//         now()->addMinutes(5),
+//         fn() => DB::table('analytics_events')
+//             ->where('event', 'page_view')
+//             ->whereNotNull('session_id')
+//             ->havingRaw('COUNT(*) = 1')
+//             ->count()
+//     );
+// }
 
 
     /* =========================
@@ -283,22 +377,43 @@ class DashboardMetrics
             $this->cacheKey('all'),
             now()->addMinutes(3),
             fn() => [
-                'users' => $this->totalUsers(),
-                'products' => $this->totalProducts(),
-                'visits' => $this->totalVisits(),
-                'contacts' => $this->totalContactMessages(),
-                'whatsapp_clicks' => $this->whatsappClicks(),
-                'social_clicks' => $this->socialClicks(),
-                'conversion_rate' => $this->conversionRate(),
-                'top_pages' => $this->topPages(),
-                'daily_visits' => $this->dailyVisits(),
-                'monthly_visits' => $this->monthlyVisits(),
-                'activities' => $this->latestActivities(),
-                'visits_sparkline' => $this->visitsSparkline(),
-                'visits_trend' => $this->visitsTrend(),
-                'contacts_sparkline' => $this->contactsSparkline(),
-                'conversion_trend' => $this->conversionTrend(),
-                'notifications' => $this->latestNotifications(),
+            // Core
+            'users' => $this->totalUsers(),
+            'products' => $this->totalProducts(),
+            'visits' => $this->totalVisits(),
+            'contacts' => $this->totalContactMessages(),
+
+            // Today / Trends
+            'today_visits' => $this->todayVisits(),
+            'yesterday_visits' => $this->yesterdayVisits(),
+            'today_contacts' => $this->todayContacts(),
+            'visits_trend' => $this->visitsTrend(),
+            'conversion_trend' => $this->conversionTrend(),
+
+            // Engagement
+            // 'single_page_visits' => $this->singlePageVisits(),
+            'conversion_rate' => $this->conversionRate(),
+            'funnel' => $this->funnel(),
+
+            // Clicks
+            'whatsapp_clicks' => $this->whatsappClicks(),
+            'social_clicks' => $this->socialClicks(),
+
+            // Sources / Pages
+            'top_pages' => $this->topPages(),
+            'top_sources' => $this->topSources(),
+
+            // Charts
+            'daily_visits' => $this->dailyVisits(),
+            'monthly_visits' => $this->monthlyVisits(),
+            'visits_sparkline' => $this->visitsSparkline(),
+            'contacts_sparkline' => $this->contactsSparkline(),
+
+            // System
+            'activities' => $this->latestActivities(),
+            'notifications' => $this->latestNotifications(),
+            'dashboard_health' => $this->isDashboardHealthy(),
+            // 'last_admin_login' => $this->lastAdminLogin(),
             ]
         );
     }

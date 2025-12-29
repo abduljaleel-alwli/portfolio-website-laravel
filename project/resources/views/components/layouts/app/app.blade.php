@@ -11,6 +11,9 @@
     {{ $slot }}
 
     @fluxScripts
+
+    {{-- Footer Script --}}
+    {!! $settings['scripts.footer'] ?? ''  !!}
 </body>
 
 </html>

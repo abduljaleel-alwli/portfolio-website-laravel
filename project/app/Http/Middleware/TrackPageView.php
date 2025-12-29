@@ -9,7 +9,13 @@ class TrackPageView
 {
     public function handle($request, Closure $next)
     {
-        if ($request->method() === 'GET' && ! $request->ajax()) {
+        // استثناء لوحة التحكم
+        if ($request->is('admin/*')) {
+            return $next($request);
+        }
+
+        // تتبع الصفحات العامة فقط
+        if ($request->isMethod('GET') && ! $request->ajax()) {
             app(AnalyticsService::class)->track('page_view');
         }
 

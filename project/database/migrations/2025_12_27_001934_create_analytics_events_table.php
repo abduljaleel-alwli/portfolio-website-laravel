@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('entity_type')->nullable(); // page, product, user
             $table->string('entity_id')->nullable();
 
-            $table->string('page')->nullable();
+            $table->string('page', 512)->nullable();
             $table->string('source')->nullable();
 
             $table->ipAddress('ip')->nullable();
-            $table->string('user_agent')->nullable();
+            $table->text('user_agent')->nullable();
 
             $table->foreignId('user_id')
                 ->nullable()
