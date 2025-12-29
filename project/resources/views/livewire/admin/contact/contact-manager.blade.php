@@ -12,18 +12,23 @@ new class extends Component {
     public string $email_to = '';
     public string $phone = '';
     public string $map_url = '';
+    public string $location = '';
+    public string $email_subject = '';
 
     public array $social_links = [];
 
     public function mount(SettingsService $settings): void
     {
-        $this->authorize('viewAny', \App\Models\User::class);
+        // Only admin & super-admin (super-admin bypass via Gate::before)
+        $this->authorize('access-dashboard');
 
-        $this->title        = (string) $settings->get('contact.title', '');
-        $this->description  = (string) $settings->get('contact.description', '');
-        $this->email_to     = (string) $settings->get('contact.email_to', '');
-        $this->phone        = (string) $settings->get('contact.phone', '');
-        $this->map_url      = (string) $settings->get('contact.map_url', '');
+        $this->title = (string) $settings->get('contact.title', '');
+        $this->description = (string) $settings->get('contact.description', '');
+        $this->email_to = (string) $settings->get('contact.email_to', '');
+        $this->phone = (string) $settings->get('contact.phone', '');
+        $this->map_url = (string) $settings->get('contact.map_url', '');
+        $this->location = (string) $settings->get('contact.location', '');
+        $this->email_subject = (string) $settings->get('contact.email_subject', '');
 
         $this->social_links = (array) $settings->get('contact.social_links', []);
     }
@@ -33,6 +38,8 @@ new class extends Component {
         $this->social_links[] = [
             'platform' => '',
             'url' => '',
+            'icon_type' => 'class',
+            'icon_value' => '',
         ];
     }
 
@@ -51,9 +58,13 @@ new class extends Component {
                 'email_to' => ['required', 'email'],
                 'phone' => ['nullable', 'string', 'max:50'],
                 'map_url' => ['nullable', 'string', 'max:500'],
+                'location' => ['nullable', 'string', 'max:255'],
+                'email_subject' => ['nullable', 'string', 'max:255'],
                 'social_links' => ['array'],
                 'social_links.*.platform' => ['required', 'string', 'max:50'],
-                'social_links.*.url' => ['required', 'string', 'max:500'],
+                'social_links.*.url' => ['required', 'url', 'max:500'],
+                'social_links.*.icon_type' => ['required', 'in:class,svg'],
+                'social_links.*.icon_value' => ['required', 'string'],
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->failedValidation();
@@ -66,18 +77,24 @@ new class extends Component {
         $settings->set('contact.email_to', $this->email_to, 'string', 'contact');
         $settings->set('contact.phone', $this->phone, 'string', 'contact');
         $settings->set('contact.map_url', $this->map_url, 'string', 'contact');
+        $settings->set('contact.location', $this->location, 'string', 'contact');
+        $settings->set('contact.email_subject', $this->email_subject, 'string', 'contact');
         $settings->set('contact.social_links', $this->social_links, 'json', 'contact');
 
-        $this->js("
+        $this->js(
+            "
             window.dispatchEvent(
                 new CustomEvent('toast', {
                     detail: {
                         type: 'success',
-                        message: '" . __('Contact page updated successfully') . "'
+                        message: '" .
+                __('Contact page updated successfully') .
+                "'
                     }
                 })
             );
-        ");
+        ",
+        );
     }
 
     protected function failedValidation(): void
@@ -86,7 +103,6 @@ new class extends Component {
         $this->map_url = (string) $this->map_url;
         $this->social_links = array_values($this->social_links);
     }
-
 };
 ?>
 
@@ -96,41 +112,276 @@ new class extends Component {
         'description' => __('Manage contact page information'),
     ])
 
-    <div class="card space-y-4">
-        <input wire:model.defer="title" class="input w-full" placeholder="{{ __('Title') }}" />
-        <textarea wire:model.defer="description" class="textarea w-full" rows="3"
-            placeholder="{{ __('Description') }}"></textarea>
-
-        <input wire:model.defer="email_to" class="input w-full" placeholder="{{ __('Email recipient') }}" />
-        <input wire:model.defer="phone" class="input w-full" placeholder="{{ __('Phone number') }}" />
-        <input wire:model="map_url" class="input w-full" placeholder="{{ __('Google Maps URL') }}" />
+    <div class="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+        {{-- Heroicon: envelope --}}
+        <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5A2.25 2.25 0 0119.5 19.5h-15
+               A2.25 2.25 0 012.25 17.25V6.75
+               M21.75 6.75l-9.75 6-9.75-6" />
+        </svg>
+        {{ __('Main contact information') }}
     </div>
 
-    <div class="card space-y-4">
-        <div class="flex justify-between items-center">
-            <h3 class="font-semibold">{{ __('Social links') }}</h3>
-            <button wire:click="addSocial" class="btn-secondary">
+    {{-- Main info --}}
+    <div
+        class="rounded-2xl border border-slate-200 dark:border-slate-800
+               bg-white dark:bg-slate-900/90 p-6 space-y-6">
+
+        {{-- Title --}}
+        <div>
+            <label class="block text-xs text-slate-500 mb-1">
+                {{ __('Title') }}
+            </label>
+            <input wire:model.defer="title" class="input w-full @error('title') ring-1 ring-red-500 @enderror"
+                placeholder="{{ __('Contact page title') }}" />
+            @error('title')
+                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        {{-- Description --}}
+        <div>
+            <label class="block text-xs text-slate-500 mb-1">
+                {{ __('Description') }}
+            </label>
+            <textarea wire:model.defer="description" class="textarea w-full @error('description') ring-1 ring-red-500 @enderror"
+                rows="4" placeholder="{{ __('Short description shown on the contact page') }}"></textarea>
+            @error('description')
+                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {{-- Email --}}
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">
+                    {{ __('Email recipient') }}
+                </label>
+                <input wire:model.defer="email_to" class="input w-full @error('email_to') ring-1 ring-red-500 @enderror"
+                    placeholder="info@example.com" />
+                @error('email_to')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Phone --}}
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">
+                    {{ __('Phone number') }}
+                </label>
+                <input wire:model.defer="phone" class="input w-full @error('phone') ring-1 ring-red-500 @enderror"
+                    placeholder="+970 599 000 000" />
+                @error('phone')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Location --}}
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">
+                    {{ __('Location') }}
+                </label>
+                <input wire:model.defer="location" class="input w-full @error('location') ring-1 ring-red-500 @enderror"
+                    placeholder="{{ __('City, Country') }}" />
+                @error('location')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Email subject --}}
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">
+                    {{ __('Email subject') }}
+                </label>
+                <input wire:model.defer="email_subject"
+                    class="input w-full @error('email_subject') ring-1 ring-red-500 @enderror"
+                    placeholder="{{ __('New contact message') }}" />
+                @error('email_subject')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+
+        {{-- Map --}}
+        <div>
+            <label class="block text-xs text-slate-500 mb-1">
+                {{ __('Google Maps URL') }}
+            </label>
+            <input wire:model.defer="map_url" class="input w-full @error('map_url') ring-1 ring-red-500 @enderror"
+                placeholder="https://maps.google.com/..." />
+            @error('map_url')
+                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+    </div>
+
+    {{-- Social links --}}
+    <div
+        class="rounded-2xl border border-slate-200 dark:border-slate-800
+               bg-white dark:bg-slate-900/90 overflow-hidden">
+
+        <div
+            class="px-6 py-4 border-b border-slate-200 dark:border-slate-800
+           flex items-center justify-between">
+
+            <div class="flex items-center gap-2">
+                {{-- Heroicon: share --}}
+                <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 12a2.25 2.25 0 104.5 0
+                   2.25 2.25 0 00-4.5 0zm6.75-4.5
+                   a2.25 2.25 0 104.5 0
+                   2.25 2.25 0 00-4.5 0zm0 9
+                   a2.25 2.25 0 104.5 0
+                   2.25 2.25 0 00-4.5 0z" />
+                </svg>
+
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">
+                    {{ __('Social links') }}
+                </h3>
+            </div>
+
+            <button wire:click="addSocial"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm
+               bg-accent text-white hover:opacity-90 transition">
+                {{-- Heroicon: plus --}}
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
                 {{ __('Add link') }}
             </button>
         </div>
 
-        @foreach ($social_links as $index => $social)
-            <div class="grid grid-cols-2 gap-3">
-                <input wire:model="social_links.{{ $index }}.platform"
-                    class="input" placeholder="{{ __('Platform') }}" />
-                <input wire:model="social_links.{{ $index }}.url"
-                    class="input" placeholder="{{ __('URL') }}" />
-                <button wire:click="removeSocial({{ $index }})"
-                    class="text-red-600 text-sm col-span-2 text-right">
-                    {{ __('Remove') }}
-                </button>
-            </div>
-        @endforeach
+
+        <div class="p-6 space-y-4">
+            @forelse ($social_links as $index => $social)
+                @php
+                    $hasError =
+                        $errors->has("social_links.$index.platform") ||
+                        $errors->has("social_links.$index.url") ||
+                        $errors->has("social_links.$index.icon_type") ||
+                        $errors->has("social_links.$index.icon_value");
+                @endphp
+
+                <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+                    {{-- Heroicon: link --}}
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 016.364 6.364l-3.182 3.182
+               a4.5 4.5 0 01-6.364-6.364l1.182-1.182" />
+                    </svg>
+                    {{ __('Social link') }} #{{ $index + 1 }}
+                </div>
+
+                <div
+                    class="rounded-xl p-5 space-y-4 border transition
+                    {{ $hasError
+                        ? 'border-red-300 bg-red-50 dark:bg-red-950/30 ring-2 ring-red-500'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50' }}">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">
+                                {{ __('Platform') }}
+                            </label>
+                            <input wire:model.defer="social_links.{{ $index }}.platform"
+                                class="input w-full
+                                @error('social_links.' . $index . '.platform') ring-1 ring-red-500 @enderror"
+                                placeholder="facebook / whatsapp" />
+                            @error('social_links.' . $index . '.platform')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">
+                                {{ __('URL') }}
+                            </label>
+                            <input wire:model.defer="social_links.{{ $index }}.url"
+                                class="input w-full
+                                @error('social_links.' . $index . '.url') ring-1 ring-red-500 @enderror"
+                                placeholder="https://..." />
+                            @error('social_links.' . $index . '.url')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+        <label class="block text-xs text-slate-500 mb-1">
+            {{ __('Icon type') }}
+        </label>
+        <select wire:model.defer="social_links.{{ $index }}.icon_type"
+            class="input w-full">
+            <option value="class">{{ __('Font Awesome class') }}</option>
+            <option value="svg">{{ __('SVG code') }}</option>
+        </select>
     </div>
 
-    <div class="flex justify-end">
-        <button wire:click="save" class="btn-primary">
-            {{ __('Save changes') }}
+    <div>
+        <label class="block text-xs text-slate-500 mb-1">
+            {{ __('Icon value') }}
+        </label>
+        <textarea wire:model.defer="social_links.{{ $index }}.icon_value"
+            class="textarea w-full font-mono text-xs"
+            rows="2"
+            placeholder="{{ __('Icon class or SVG code') }}"></textarea>
+    </div>
+</div>
+
+
+<div class="flex justify-end">
+    <button wire:click="removeSocial({{ $index }})"
+        class="inline-flex items-center gap-1 text-xs text-red-500 hover:underline">
+        {{-- Heroicon: trash --}}
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21
+                   c.342.052.682.107 1.022.166M5.772 5.79
+                   L6.84 19.673a2.25 2.25 0 002.244 2.077h7.832
+                   a2.25 2.25 0 002.244-2.077L18.228 5.79" />
+        </svg>
+        {{ __('Remove link') }}
+    </button>
+</div>
+
+                </div>
+            @empty
+                <div class="text-sm text-slate-500 text-center py-6">
+                    {{ __('No social links added yet') }}
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- Sticky save --}}
+    <div
+        class="sticky bottom-0 z-10
+               bg-white/90 dark:bg-slate-900/90
+               backdrop-blur
+               border-t border-slate-200 dark:border-slate-800
+               px-6 py-4 flex justify-end">
+
+        <button wire:click="save" wire:loading.attr="disabled" wire:target="save"
+            class="px-6 py-2 rounded-xl text-sm
+                   bg-accent text-white
+                   hover:opacity-90 transition
+                   disabled:opacity-50 disabled:cursor-not-allowed
+                   flex items-center gap-2">
+
+            <svg wire:loading wire:target="save" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 animate-spin"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <circle cx="12" cy="12" r="10" stroke-width="4" class="opacity-25" />
+                <path d="M12 2a10 10 0 0110 10" stroke-width="4" class="opacity-75" />
+            </svg>
+
+            <span wire:loading.remove wire:target="save">
+                {{ __('Save changes') }}
+            </span>
+            <span wire:loading wire:target="save">
+                {{ __('Saving...') }}
+            </span>
         </button>
     </div>
 </div>

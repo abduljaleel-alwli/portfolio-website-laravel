@@ -88,23 +88,4 @@ class User extends Authenticatable
     {
         return !$this->hasRole('super-admin');
     }
-
-    public static function firstSuperAdmin(): ?self
-    {
-        return self::role('super-admin')
-            ->orderBy('created_at')
-            ->first();
-    }
-
-    public function isFirstSuperAdmin(): bool
-    {
-        return $this->hasRole('super-admin')
-            && self::firstSuperAdmin()?->id === $this->id;
-    }
-
-    public function isOtherSuperAdmin(): bool
-    {
-        return $this->hasRole('super-admin')
-            && ! $this->isFirstSuperAdmin();
-    }
 }

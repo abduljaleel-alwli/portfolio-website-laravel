@@ -6,9 +6,17 @@ use App\Models\User;
 
 class UserPolicy
 {
-    public function viewAny(User $authUser): bool
+    /**
+     * فقط super-admin يرى المستخدمين
+     */
+    public function viewAny(User $user): bool
     {
-        return $authUser->hasRole('super-admin');
+        return $user->hasRole('super-admin');
+    }
+
+    public function view(User $user, User $model): bool
+    {
+        return $user->hasRole('super-admin');
     }
 
     public function create(User $authUser): bool

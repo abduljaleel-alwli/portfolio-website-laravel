@@ -4,6 +4,7 @@ namespace App\Actions\Products;
 
 use App\Models\Product;
 use App\Support\Auditable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class ReorderProducts
@@ -11,19 +12,18 @@ class ReorderProducts
     use Auditable;
 
     /**
-     * @param array<int, int> $orderedIds
+     * @param array<int, int> $ids
      */
-    public function execute(array $orderedIds): void
+    public function execute(array $ids): void
     {
-        Gate::authorize('update', Product::class);
+        Gate::authorize('access-dashboard');
 
-        foreach ($orderedIds as $index => $productId) {
-            Product::where('id', $productId)
-                ->update(['display_order' => $index + 1]);
-        }
-
-        $this->audit('product.reordered', null, [
-            'order' => $orderedIds,
-        ]);
+        DB::transaction(function () use ($ids) {
+            foreach ($ids as $index => $id) {
+                Product::where('id', $id)->update([
+                    'display_order' => $index + 1,
+                ]);
+            }
+        });
     }
 }

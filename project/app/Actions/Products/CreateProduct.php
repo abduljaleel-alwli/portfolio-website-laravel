@@ -6,6 +6,8 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+
 use App\Support\Auditable;
 
 class CreateProduct
@@ -33,6 +35,10 @@ class CreateProduct
             }
         }
 
+        // 🔢 Calculate next display order
+        $nextOrder = Product::max('display_order') ?? 0;
+        $nextOrder++;
+
         $product = Product::create([
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
@@ -40,7 +46,7 @@ class CreateProduct
             'main_image' => $mainImagePath,
             'images' => $images,
             'is_active' => $data['is_active'] ?? true,
-            'display_order' => $data['display_order'] ?? 0,
+            'display_order' => $nextOrder,
             'meta_title' => $data['meta_title'] ?? null,
             'meta_description' => $data['meta_description'] ?? null,
             'created_by' => Auth::id(),

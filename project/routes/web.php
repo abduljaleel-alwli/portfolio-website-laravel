@@ -1,17 +1,27 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
 // ---> Public Landing Page
-// -- Home
-Route::get('/', fn() => view('welcome'))->name('home');
+Volt::route('/', 'home')->name('home');
+Volt::route('/products', 'app.products.index')->name('products.index');
+Volt::route('/about', 'app.about.index')->name('about.index');
+Volt::route('/contact', 'app.contact.index')->name('contact.index');
 
-// --> products
-Volt::route('/products', 'products.index')->name('products.index');
-Volt::route('/about', 'about.index')->name('about.index');
-Volt::route('/contact', 'contact.index')->name('contact.index');
+// --> Analytics tracking endpoint
+Route::post('/analytics/track', function (Request $request) {
+    app(\App\Services\Analytics\AnalyticsService::class)->track(
+        $request->input('event'),
+        $request->all()
+    );
+
+    return response()->noContent();
+})
+->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+->name('analytics.track');
 
 
 // ---> Super-Admin & Admin

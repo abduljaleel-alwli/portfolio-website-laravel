@@ -19,6 +19,7 @@ class StoreContactMessage
             'email'      => $data['email'],
             'message'    => $data['message'],
             'ip_address' => $ipAddress,
+            'phone'      => $data['phone'],
         ]);
     }
 }

@@ -11,5 +11,14 @@ class ContactMessage extends Model
         'email',
         'message',
         'ip_address',
+        'phone',
+        'read_at',
+        'tag',
+        'replied_at',
+    ];
+
+    protected $casts = [
+        'read_at' => 'datetime',
+        'replied_at' => 'datetime',
     ];
 }

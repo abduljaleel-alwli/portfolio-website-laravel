@@ -16,7 +16,7 @@ return new class extends Migration
 
             $table->string('event'); // page_view, whatsapp_click ...
             $table->string('entity_type')->nullable(); // page, product, user
-            $table->unsignedBigInteger('entity_id')->nullable();
+            $table->string('entity_id')->nullable();
 
             $table->string('page')->nullable();
             $table->string('source')->nullable();

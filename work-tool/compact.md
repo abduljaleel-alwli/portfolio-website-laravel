@@ -451,3 +451,44 @@ user_created	إنشاء مستخدم
 2️⃣ Dashboard Caching (Redis / Cache)
 3️⃣ Real-time Dashboard (Polling / Echo)
 4️⃣ Advanced Notification Center
+
+-------------------
+
+✅ contact.email_subject
+
+php artisan storage:link
+
+php artisan cache:clear
+
+------------
+<a
+    href="https://wa.me/{{ settings('contact.phone') }}"
+    target="_blank"
+    wire:click="trackSocialClick('whatsapp')"
+    class="btn-whatsapp"
+>
+    WhatsApp
+</a>
+
+--------
+Preview للأيقونة مباشرة في لوحة التحكم ✅
+
+أو Dropdown جاهز لأيقونات Font Awesome
+
+أو رفع SVG بدل لصق الكود ✅
+
+----------------------------
+
+<flux:navlist variant="outline">
+    <flux:navlist.group :heading="__('Public')" class="grid">
+        <flux:navlist.item icon="home" :href="route('products.index')"
+            :current="request()->routeIs('products.index')" wire:navigate>{{ __('Products') }}
+        </flux:navlist.item>
+        <flux:navlist.item icon="home" :href="route('about.index')"
+            :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}
+        </flux:navlist.item>
+        <flux:navlist.item icon="home" :href="route('contact.index')"
+            :current="request()->routeIs('contact.index')" wire:navigate>{{ __('Contact') }}
+        </flux:navlist.item>
+    </flux:navlist.group>
+</flux:navlist>

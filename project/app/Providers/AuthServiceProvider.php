@@ -26,6 +26,10 @@ class AuthServiceProvider extends ServiceProvider
             return $user->hasRole('super-admin') ? true : null;
         });
 
+        Gate::define('access-dashboard', function ($user) {
+            return $user->hasAnyRole(['admin', 'super-admin']);
+        });
+
         Auth::viaRequest('web', function ($request) {
             $user = Auth::user();
 

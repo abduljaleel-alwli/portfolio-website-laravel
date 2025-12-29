@@ -8,14 +8,6 @@ use App\Models\User;
 class ProductPolicy
 {
     /**
-     * Access admin products list.
-     */
-    public function viewAny(User $user): bool
-    {
-        return $user->hasAnyRole(['admin', 'super-admin']);
-    }
-
-    /**
      * Create product.
      */
     public function create(User $user): bool

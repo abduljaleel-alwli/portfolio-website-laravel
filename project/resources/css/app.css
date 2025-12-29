@@ -30,9 +30,9 @@
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-white);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
+        --color-accent: var(--color-secondary);
+        --color-accent-content: var(--color-secondary);
+        --color-accent-foreground: var(--color-background);
     }
 }
 

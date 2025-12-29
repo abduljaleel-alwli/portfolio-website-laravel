@@ -8,14 +8,6 @@ use App\Models\Category;
 class CategoryPolicy
 {
     /**
-     * Determine whether the user can view categories.
-     */
-    public function viewAny(User $user): bool
-    {
-        return $user->hasRole(['admin', 'super-admin']);
-    }
-
-    /**
      * Determine whether the user can create categories.
      */
     public function create(User $user): bool

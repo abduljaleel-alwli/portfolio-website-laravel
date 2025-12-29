@@ -11,39 +11,46 @@ class UpdateProduct
 {
     use Auditable;
 
-    /**
-     * Update an existing product.
-     */
     public function execute(Product $product, array $data): Product
     {
         Gate::authorize('update', $product);
 
-        // Update main image if provided
-        if (!empty($data['main_image'])) {
+        // 🔴 Main image replacement
+        if (array_key_exists('main_image', $data) && $data['main_image']) {
+
+            // Delete old main image
             if ($product->main_image) {
                 Storage::disk('public')->delete($product->main_image);
             }
 
+            // Store new main image
             $product->main_image = $data['main_image']->store('products', 'public');
         }
 
-        // Update gallery images if provided
-        if (!empty($data['images']) && is_array($data['images'])) {
-            if (!empty($product->images)) {
+        // 🔴 Gallery replacement (only if new images sent)
+        if (
+            array_key_exists('images', $data)
+            && is_array($data['images'])
+            && count($data['images']) > 0
+        ) {
+
+            // Delete old gallery images
+            if (is_array($product->images)) {
                 foreach ($product->images as $oldImage) {
                     Storage::disk('public')->delete($oldImage);
                 }
             }
 
-            $images = [];
+            // Store new gallery images
+            $paths = [];
             foreach ($data['images'] as $image) {
-                $images[] = $image->store('products/gallery', 'public');
+                $paths[] = $image->store('products/gallery', 'public');
             }
 
-            $product->images = $images;
+            $product->images = $paths;
         }
 
-        // Update basic fields
+        // 🔵 Update basic fields
         $product->update([
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
@@ -54,9 +61,13 @@ class UpdateProduct
             'meta_description' => $data['meta_description'] ?? null,
         ]);
 
-        $this->audit('product.updated', $product, [
-            'fields' => array_keys($data),
-        ]);
+        $this->audit(
+            'product.updated',
+            $product,
+            [
+                'updated_fields' => array_keys($data),
+            ]
+        );
 
         return $product;
     }

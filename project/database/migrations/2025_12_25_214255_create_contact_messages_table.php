@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -19,6 +18,11 @@ return new class extends Migration
             $table->text('message');
 
             $table->string('ip_address', 45)->nullable();
+            $table->string('phone')->nullable();
+
+            $table->timestamp('read_at')->nullable();
+            $table->string('tag')->nullable(); // sales | support | spam ...
+            $table->timestamp('replied_at')->nullable();
 
             $table->timestamps();
         });

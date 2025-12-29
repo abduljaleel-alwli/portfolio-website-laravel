@@ -21,6 +21,9 @@ new class extends Component {
 
     protected string $paginationTheme = 'tailwind';
 
+    public bool $showConfirmDelete = false;
+    public ?int $deleteUserId = null;
+
     /* =====================
        Lifecycle
     ===================== */
@@ -37,8 +40,6 @@ new class extends Component {
 
     public string $search = '';
     public bool $showCreateModal = false;
-    public string $searchInput = '';
-
 
     public string $name = '';
     public string $email = '';
@@ -54,6 +55,25 @@ new class extends Component {
     public string $editRole = 'admin';
 
     /* =====================
+       Modals Actions
+    ===================== */
+    public function confirmDeleteUser(int $userId): void
+    {
+        $user = User::findOrFail($userId);
+
+        $this->authorize('delete', $user);
+
+        $this->deleteUserId = $userId;
+        $this->showConfirmDelete = true;
+    }
+
+    public function cancelDeleteUser(): void
+    {
+        $this->deleteUserId = null;
+        $this->showConfirmDelete = false;
+    }
+
+    /* =====================
        Computed
     ===================== */
 
@@ -62,22 +82,16 @@ new class extends Component {
         return User::query()
             ->with('roles')
             ->when($this->search, function ($query) {
-                $query->where(
-                    fn($q) =>
-                    $q->where('name', 'like', "%{$this->search}%")
-                        ->orWhere('email', 'like', "%{$this->search}%")
-                );
+                $query->where(fn($q) => $q->where('name', 'like', "%{$this->search}%")->orWhere('email', 'like', "%{$this->search}%"));
             })
             ->latest()
             ->paginate(10);
     }
 
-    public function applySearch(): void
+    public function updatedSearch(): void
     {
-        $this->search = $this->searchInput;
-        $this->resetPage(); // مهم مع pagination
+        $this->resetPage();
     }
-
 
     public function editUser(User $user): void
     {
@@ -90,7 +104,6 @@ new class extends Component {
         $this->editRole = $user->roles->first()?->name ?? 'admin';
 
         $this->showEditModal = true;
-
     }
 
     public function stats(): array
@@ -134,29 +147,32 @@ new class extends Component {
         ]);
 
         // 🔹 Push Notification
-        auth()->user()->notify(
-            new UserActionNotification(
-                'user.created',
-                [
+        auth()
+            ->user()
+            ->notify(
+                new UserActionNotification('user.created', [
                     'user_id' => $user->id,
                     'email' => $user->email,
-                ]
-            )
-        );
+                ]),
+            );
 
         $this->resetForm();
         $this->resetPage();
 
-        $this->js("
+        $this->js(
+            "
             window.dispatchEvent(
                 new CustomEvent('toast', {
                     detail: {
                         type: 'success',
-                        message: '" . __('User created and password reset link sent successfully') . "'
+                        message: '" .
+                __('User created and password reset link sent successfully') .
+                "'
                     }
                 })
             );
-        ");
+        ",
+        );
     }
 
     public function updateUser(): void
@@ -165,25 +181,18 @@ new class extends Component {
 
         $this->validate([
             'editName' => ['required', 'string', 'max:255'],
-            'editEmail' => [
-                'required',
-                'email',
-                'unique:users,email,' . $this->editingUser->id,
-            ],
+            'editEmail' => ['required', 'email', 'unique:users,email,' . $this->editingUser->id],
             'editRole' => ['required', 'in:admin,super-admin'],
         ]);
 
         app(UpdateUser::class)->execute($this->editingUser, [
-            'name'  => $this->editName,
+            'name' => $this->editName,
             'email' => $this->editEmail,
-            'note'  => $this->editNote,
+            'note' => $this->editNote,
         ]);
 
         if ($this->editingUser->roles->first()?->name !== $this->editRole) {
-            app(ChangeUserRole::class)->execute(
-                $this->editingUser,
-                $this->editRole
-            );
+            app(ChangeUserRole::class)->execute($this->editingUser, $this->editRole);
         }
 
         // 🔹 Audit Log
@@ -192,34 +201,41 @@ new class extends Component {
         ]);
 
         // 🔹 Push Notification
-        auth()->user()->notify(
-            new UserActionNotification(
-                'user.updated',
-                [
+        auth()
+            ->user()
+            ->notify(
+                new UserActionNotification('user.updated', [
                     'user_id' => $this->editingUser->id,
                     'email' => $this->editingUser->email,
-                ]
-            )
-        );
+                ]),
+            );
 
         $this->resetEditForm();
         $this->resetPage();
 
-        $this->js("
+        $this->js(
+            "
         window.dispatchEvent(
             new CustomEvent('toast', {
                 detail: {
                     type: 'success',
-                    message: '" . __('User updated successfully') . "'
+                    message: '" .
+                __('User updated successfully') .
+                "'
                 }
             })
         );
-    ");
+    ",
+        );
     }
 
-    public function deleteUser(int $userId): void
+    public function deleteUserConfirmed(): void
     {
-        $user = User::findOrFail($userId);
+        if (!$this->deleteUserId) {
+            return;
+        }
+
+        $user = User::findOrFail($this->deleteUserId);
 
         $this->authorize('delete', $user);
 
@@ -231,28 +247,32 @@ new class extends Component {
         ]);
 
         // 🔔 Notification
-        auth()->user()->notify(
-            new UserActionNotification(
-                'user.deleted',
-                [
+        auth()
+            ->user()
+            ->notify(
+                new UserActionNotification('user.deleted', [
                     'user_id' => $user->id,
                     'email' => $user->email,
-                ]
-            )
-        );
+                ]),
+            );
 
+        $this->cancelDeleteUser();
         $this->resetPage();
 
-        $this->js("
+        $this->js(
+            "
         window.dispatchEvent(
             new CustomEvent('toast', {
                 detail: {
                     type: 'success',
-                    message: '" . __('User deleted successfully') . "'
+                    message: '" .
+                __('User deleted successfully') .
+                "'
                 }
             })
         );
-    ");
+    ",
+        );
     }
 
     public function toggleUserStatus(int $userId): void
@@ -268,28 +288,29 @@ new class extends Component {
         ]);
 
         // 🔹 Push Notification
-        auth()->user()->notify(
-            new UserActionNotification(
-                'user.status_changed',
-                [
+        auth()
+            ->user()
+            ->notify(
+                new UserActionNotification('user.status_changed', [
                     'user_id' => $user->id,
                     'is_active' => $user->is_active,
-                ]
-            )
-        );
+                ]),
+            );
 
-        $this->js("
+        $this->js(
+            "
             window.dispatchEvent(
                 new CustomEvent('toast', {
                     detail: {
                         type: 'success',
-                        message: '" . ($user->is_active
-            ? __('The user has been activated successfully')
-            : __('The user has been successfully disabled')) . "'
+                        message: '" .
+                ($user->is_active ? __('The user has been activated successfully') : __('The user has been successfully disabled')) .
+                "'
                     }
                 })
             );
-        ");
+        ",
+        );
     }
 
     public function canActOn(User $user): bool
@@ -306,30 +327,15 @@ new class extends Component {
         return null;
     }
 
-
     public function resetForm(): void
     {
-        $this->reset([
-            'name',
-            'email',
-            'role',
-            'note',
-            'showCreateModal',
-        ]);
+        $this->reset(['name', 'email', 'role', 'note', 'showCreateModal']);
     }
 
     public function resetEditForm(): void
     {
-        $this->reset([
-            'showEditModal',
-            'editingUser',
-            'editName',
-            'editEmail',
-            'editNote',
-            'editRole',
-        ]);
+        $this->reset(['showEditModal', 'editingUser', 'editName', 'editEmail', 'editNote', 'editRole']);
     }
-
 };
 ?>
 
@@ -337,182 +343,251 @@ new class extends Component {
 <!-- =====================
      UI
 ===================== -->
+<div class="space-y-8">
 
-<div class="space-y-6">
+    {{-- Stats --}}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        @foreach ([
+        [
+            'label' => __('Total users'),
+            'value' => $this->stats()['total'],
+            'icon' => 'users',
+            'color' => 'text-slate-400 dark:text-slate-300',
+            'bg' => 'bg-slate-200/10 dark:bg-slate-800/60',
+        ],
+        [
+            'label' => __('Admins'),
+            'value' => $this->stats()['admins'],
+            'icon' => 'shield-check',
+            'color' => 'text-sky-600 dark:text-sky-400',
+            'bg' => 'bg-sky-500/10 dark:bg-sky-500/20',
+        ],
+        [
+            'label' => __('Super admins'),
+            'value' => $this->stats()['superAdmins'],
+            'icon' => 'star',
+            'color' => 'text-amber-500 dark:text-amber-400',
+            'bg' => 'bg-amber-500/10 dark:bg-amber-500/20',
+        ],
+    ] as $stat)
+            <div
+                class="rounded-2xl border border-slate-200 dark:border-slate-800
+                   p-5
+                   flex items-center justify-between {{ $stat['bg'] }}">
+                <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ $stat['label'] }}</p>
+                    <p class="text-2xl font-semibold text-slate-900 dark:text-white">
+                        {{ $stat['value'] }}
+                    </p>
+                </div>
 
-    <!-- Dashboard Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white rounded-lg p-4 shadow">
-            <p class="text-sm text-gray-500">{{ __('Total users') }}</p>
-            <p class="text-2xl font-bold">{{ $this->stats()['total'] }}</p>
-        </div>
+                {{-- Heroicon --}}
+                @switch($stat['icon'])
+                    @case('users')
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 {{ $stat['color'] }}" fill="none"
+                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372
+                                                       9.337 9.337 0 004.121-.952
+                                                       4.125 4.125 0 00-7.533-2.493M15
+                                                       19.128v-.003c0-1.113-.285-2.16-.786-3.07M15
+                                                       19.128v.106A12.318 12.318 0 018.624
+                                                       21c-2.331 0-4.512-.645-6.374-1.766
+                                                       1.072-3.004 3.86-5.125 7.124-5.125
+                                                       1.083 0 2.107.233 3.024.655M9
+                                                       7.5a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z" />
+                        </svg>
+                    @break
 
-        <div class="bg-white rounded-lg p-4 shadow">
-            <p class="text-sm text-gray-500">{{ __('Admins') }}</p>
-            <p class="text-2xl font-bold">{{ $this->stats()['admins'] }}</p>
-        </div>
+                    @case('shield-check')
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 {{ $stat['color'] }}" fill="none"
+                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25L15 9.75
+                                                       M12 3l7.5 4.5v5.25
+                                                       c0 4.142-2.686 7.875-7.5 9
+                                                       -4.814-1.125-7.5-4.858-7.5-9V7.5L12 3z" />
+                        </svg>
+                    @break
 
-        <div class="bg-white rounded-lg p-4 shadow">
-            <p class="text-sm text-gray-500">{{ __('Super Admins') }}</p>
-            <p class="text-2xl font-bold">{{ $this->stats()['superAdmins'] }}</p>
-        </div>
+                    @case('star')
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 {{ $stat['color'] }}" fill="none"
+                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0
+                                                       l2.125 5.111a.563.563 0 00.475.345
+                                                       l5.518.442c.499.04.701.663.321.988
+                                                       l-4.204 3.602a.563.563 0 00-.182.557
+                                                       l1.285 5.385a.562.562 0 01-.84.61
+                                                       l-4.725-2.885a.563.563 0 00-.586 0
+                                                       L6.982 20.54a.562.562 0 01-.84-.61
+                                                       l1.285-5.386a.562.562 0 00-.182-.557
+                                                       l-4.204-3.602a.563.563 0 01.321-.988
+                                                       l5.518-.442a.563.563 0 00.475-.345
+                                                       L11.48 3.5z" />
+                        </svg>
+                    @break
+                @endswitch
+            </div>
+        @endforeach
     </div>
 
-    <!-- Header -->
-    <div class="flex justify-between items-center">
-        <div class="flex gap-2">
-            <input type="text" wire:model.defer="searchInput" placeholder="{{ __('Search user...') }}"
-                class="border rounded px-3 py-2 w-64" />
 
-            <button wire:click="applySearch" class="bg-gray-800 text-white px-4 py-2 rounded">
-                {{ __('Search') }}
-            </button>
+    {{-- Toolbar --}}
+    <div class="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+
+        {{-- Search --}}
+        <div class="flex gap-2">
+            <input type="text" wire:model.live="search" placeholder="{{ __('Search user...') }}"
+                class="input w-64" />
         </div>
 
-
+        {{-- Create --}}
         @can('create', App\Models\User::class)
-            <button wire:click="$set('showCreateModal', true)" class="bg-black text-white px-4 py-2 rounded">
+            <button wire:click="$set('showCreateModal', true)"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl
+                       bg-accent text-white text-sm font-medium
+                       hover:opacity-90 transition">
                 + {{ __('Create user') }}
             </button>
         @endcan
     </div>
 
-    <!-- Users Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    {{-- Users table --}}
+    <div
+        class="rounded-2xl border border-slate-200 dark:border-slate-800
+           bg-white dark:bg-slate-900/90 shadow-sm overflow-hidden">
+
         <table class="w-full text-sm">
-            <thead class="bg-gray-100">
+            <thead
+                class="bg-slate-50 dark:bg-slate-800
+                   text-slate-600 dark:text-slate-300
+                   border-b border-slate-200 dark:border-slate-700">
                 <tr>
-                    <th class="p-3 text-left">{{ __('Name') }}</th>
-                    <th class="p-3 text-left">{{ __('Email') }}</th>
-                    <th class="p-3 text-left">{{ __('Role') }}</th>
-                    <th class="p-3 text-left">{{ __('Status') }}</th>
-                    <th class="p-3 text-left">{{ __('Note') }}</th>
-                    <th class="p-3 text-left">{{ __('Actions') }}</th>
-                    <th class="p-3 text-left">{{ __('Created') }}</th>
+                    <th class="px-5 py-4 text-left font-medium">{{ __('Name') }}</th>
+                    <th class="px-5 py-4 text-left font-medium">{{ __('Email') }}</th>
+                    <th class="px-5 py-4 text-left font-medium">{{ __('Role') }}</th>
+                    <th class="px-5 py-4 text-left font-medium">{{ __('Status') }}</th>
+                    <th class="px-5 py-4 text-left font-medium">{{ __('Note') }}</th>
+                    <th class="px-5 py-4 text-right font-medium">{{ __('Actions') }}</th>
+                    <th class="px-5 py-4 text-left font-medium">{{ __('Created') }}</th>
                 </tr>
             </thead>
-            <tbody>
+
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+
                 @foreach ($this->users() as $user)
-                    <tr class="border-t">
-                        <td class="p-3">{{ $user->name }}</td>
-                        <td class="p-3">{{ $user->email }}</td>
-                        <td class="p-3">
-                            <span class="px-2 py-1 text-xs rounded bg-gray-200">
+                    <tr
+                        class="group
+                           hover:bg-slate-50 dark:hover:bg-slate-800/40
+                           transition-colors">
+
+                        {{-- Name --}}
+                        <td class="px-5 py-4 font-medium text-slate-900 dark:text-white">
+                            {{ $user->name }}
+                        </td>
+
+                        {{-- Email --}}
+                        <td class="px-5 py-4 text-slate-500">
+                            {{ $user->email }}
+                        </td>
+
+                        {{-- Role --}}
+                        <td class="px-5 py-4">
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs
+                                   bg-secondary/10 text-secondary">
                                 {{ $user->roles->first()?->name }}
                             </span>
                         </td>
-                        <td class="p-3">
+
+                        {{-- Status --}}
+                        <td class="px-5 py-4">
                             @if ($user->is_active)
-                                <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs
+                                       bg-emerald-500/10 text-emerald-600">
                                     {{ __('Active') }}
                                 </span>
                             @else
-                                <span class="px-2 py-1 text-xs rounded bg-red-100 text-red-700">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs
+                                       bg-red-500/10 text-red-600">
                                     {{ __('Disabled') }}
                                 </span>
                             @endif
                         </td>
 
-                        <td class="p-3">
-                            <span class="px-2 py-1 text-xs rounded bg-gray-200">
-                                @if ($user->note)
+                        {{-- Note --}}
+                        <td class="px-5 py-4">
+                            @if ($user->note)
+                                <span
+                                    class="inline-block max-w-[220px] truncate
+                                       px-2 py-1 rounded-md text-xs
+                                       bg-slate-100 text-slate-600
+                                       dark:bg-slate-800 dark:text-slate-300">
                                     {{ $user->note }}
-                                @else
-                                    N/N
-                                @endif
-                            </span>
+                                </span>
+                            @else
+                                <span class="text-xs text-slate-400">
+                                    {{ __('N/A') }}
+                                </span>
+                            @endif
                         </td>
-                        <td class="p-3 space-x-1">
-                            <button
-                                wire:click="toggleUserStatus({{ $user->id }})"
-                                @disabled(! $this->canActOn($user))
-                                class="text-xs px-3 py-1 rounded text-white
-                                    {{ $user->is_active ? 'bg-red-600' : 'bg-green-600' }}
-                                    disabled:opacity-40 disabled:cursor-not-allowed"
-                                title="{{ $this->cannotActReason($user) }}"
-                            >
-                                {{ $user->is_active ? __('Disable') : __('Enable') }}
-                            </button>
-                            <button
-                                wire:click="editUser({{ $user->id }})"
-                                @disabled(! $this->canActOn($user))
-                                class="text-xs px-3 py-1 rounded bg-blue-600 text-white
-                                    disabled:opacity-40 disabled:cursor-not-allowed"
-                                title="{{ $this->cannotActReason($user) }}"
-                            >
-                                {{ __('Edit') }}
-                            </button>
-                            <button
-                                wire:click="deleteUser({{ $user->id }})"
-                                wire:confirm="{{ __('Are you sure you want to delete this user?') }}"
-                                @disabled(! $this->canActOn($user))
-                                class="text-xs px-3 py-1 rounded bg-red-600 text-white
-                                    disabled:opacity-40 disabled:cursor-not-allowed"
-                                title="{{ $this->cannotActReason($user) }}"
-                            >
-                                {{ __('Delete') }}
-                            </button>
+
+                        {{-- Actions --}}
+                        <td class="px-5 py-4 text-right whitespace-nowrap">
+                            <div class="inline-flex items-center gap-1">
+
+                                <button wire:click="toggleUserStatus({{ $user->id }})" @disabled(!$this->canActOn($user))
+                                    class="px-3 py-1 rounded-full text-xs
+                                    {{ $user->is_active
+                                        ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20'
+                                        : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20' }}
+                                    disabled:opacity-40"
+                                    title="{{ $this->cannotActReason($user) }}">
+                                    {{ $user->is_active ? __('Disable') : __('Enable') }}
+                                </button>
+
+                                <button wire:click="editUser({{ $user->id }})" @disabled(!$this->canActOn($user))
+                                    class="px-3 py-1 rounded-full text-xs
+                                       bg-slate-500/10 text-slate-700
+                                       hover:bg-slate-500/20
+                                       disabled:opacity-40"
+                                    title="{{ $this->cannotActReason($user) }}">
+                                    {{ __('Edit') }}
+                                </button>
+
+                                <button wire:click="confirmDeleteUser({{ $user->id }})"
+                                    @disabled(!$this->canActOn($user))
+                                    class="px-3 py-1 rounded-full text-xs
+                                       bg-red-500/10 text-red-600
+                                       hover:bg-red-500/20
+                                       disabled:opacity-40"
+                                    title="{{ $this->cannotActReason($user) }}">
+                                    {{ __('Delete') }}
+                                </button>
+                            </div>
                         </td>
-                        <td class="p-3">
+
+                        {{-- Created --}}
+                        <td class="px-5 py-4 text-slate-500 text-xs">
                             {{ $user->created_at->format('Y-m-d') }}
                         </td>
+
                     </tr>
                 @endforeach
+
             </tbody>
         </table>
-        <div class="p-4">
+
+        <div class="px-5 py-4 border-t border-slate-200 dark:border-slate-800">
             {{ $this->users()->links() }}
         </div>
-
     </div>
 
-    <!-- Create User Modal -->
-    @if ($showCreateModal)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center">
-            <div class="bg-white w-96 p-6 rounded-lg space-y-3">
-                <h2 class="font-bold text-lg">{{ __('Create User') }}</h2>
 
-                <input wire:model="name" placeholder="Name" class="border w-full p-2 rounded">
-                <input wire:model="email" placeholder="Email" class="border w-full p-2 rounded">
-                <textarea wire:model="note" placeholder="Note (private)" class="border w-full p-2 rounded"></textarea>
+    {{-- Modals --}}
+    @includeWhen($showCreateModal, 'livewire.admin.users.create-modal')
+    @includeWhen($showEditModal, 'livewire.admin.users.edit-modal')
 
-                <select wire:model="role" class="border w-full p-2 rounded">
-                    <option value="admin">{{ __('Admin') }}</option>
-                    <option value="super-admin">{{ __('Super Admin') }}</option>
-                </select>
-
-                <div class="flex justify-end gap-2">
-                    <button wire:click="resetForm">{{ __('Cancel') }}</button>
-                    <button wire:click="createUser" class="bg-black text-white px-4 py-2 rounded">
-                        {{ __('Save') }}
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    @if ($showEditModal)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center">
-            <div class="bg-white w-96 p-6 rounded-lg space-y-3">
-                <h2 class="font-bold text-lg">{{ __('Edit User') }}</h2>
-
-                <input wire:model="editName" class="border w-full p-2 rounded" placeholder="{{ __('Name') }}">
-                <input wire:model="editEmail" class="border w-full p-2 rounded" placeholder="{{ __('Email') }}">
-                <textarea wire:model="editNote" class="border w-full p-2 rounded" placeholder="{{ __('Note') }}"></textarea>
-
-                <select wire:model="editRole" class="border w-full p-2 rounded">
-                    <option value="admin">{{ __('Admin') }}</option>
-                    <option value="super-admin">{{ __('Super Admin') }}</option>
-                </select>
-
-                <div class="flex justify-end gap-2">
-                    <button wire:click="resetEditForm">{{ __('Cancel') }}</button>
-                    <button wire:click="updateUser" class="bg-black text-white px-4 py-2 rounded">
-                        {{ __('Save') }}
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
-
+    <x-modals.confirm :show="$showConfirmDelete" type="danger" :title="__('Delete user')" :message="__('Are you sure you want to delete this user? This action cannot be undone.')" :confirmText="__('Delete')"
+        :cancelText="__('Cancel')" :confirmAction="'wire:click=deleteUserConfirmed'" :cancelAction="'wire:click=cancelDeleteUser'" confirmLoadingTarget="deleteUserConfirmed" />
 </div>
