@@ -178,7 +178,11 @@ new class extends Component {
 } ?>
 
 <section class="w-full">
-    @include('partials.settings-heading')
+@include('partials.settings-heading', [
+    'title' => __('Two-factor authentication'),
+    'description' => __('Add an extra layer of security to your account'),
+    'icon' => 'shield-check',
+])
 
     <x-settings.layout
         :heading="__('Two Factor Authentication')"

@@ -17,6 +17,9 @@ new class extends Component {
 
     /** Search */
     public string $search = '';
+    public string $statusFilter = 'all'; // all | active | inactive
+    public ?int $categoryFilter = null;
+
 
     /** Listing */
     public $products;
@@ -55,20 +58,42 @@ new class extends Component {
         $this->loadProducts();
     }
 
-    public function loadProducts(): void
-    {
-        $this->products = Product::query()
-            ->when($this->search, function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')->orWhere('description', 'like', '%' . $this->search . '%');
-            })
-            ->orderBy('display_order')
-            ->get();
-    }
+public function loadProducts(): void
+{
+    $this->products = Product::query()
+        ->when($this->search, function ($q) {
+            $q->where('title', 'like', "%{$this->search}%")
+              ->orWhere('description', 'like', "%{$this->search}%");
+        })
+        ->when($this->statusFilter === 'active', fn ($q) =>
+            $q->where('is_active', true)
+        )
+        ->when($this->statusFilter === 'inactive', fn ($q) =>
+            $q->where('is_active', false)
+        )
+        ->when($this->categoryFilter, fn ($q) =>
+            $q->where('category_id', $this->categoryFilter)
+        )
+        ->orderBy('display_order')
+        ->get();
+}
+
 
     public function updatedSearch(): void
     {
         $this->loadProducts();
     }
+
+    public function updatedStatusFilter(): void
+    {
+        $this->loadProducts();
+    }
+
+    public function updatedCategoryFilter(): void
+    {
+        $this->loadProducts();
+    }
+
 
     public function create(): void
     {
@@ -217,222 +242,373 @@ new class extends Component {
 
 <div class="space-y-8">
 
-    {{-- Header + Actions --}}
-    <div class="flex flex-col gap-4">
+    {{-- Stats cards --}}
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    {{-- Total --}}
+    <button
+        wire:click="$set('statusFilter','all')"
+        class="text-left rounded-2xl p-4
+               bg-white dark:bg-slate-900
+               border border-slate-200 dark:border-slate-800
+               flex items-center justify-between transition
+               {{ $statusFilter === 'all'
+                    ? 'ring-2 ring-accent/40'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60' }}">
 
-            {{-- Search --}}
-            <div class="relative w-full sm:max-w-sm">
-                <span class="pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-slate-400">
-                    {{-- Heroicon: magnifying-glass --}}
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M21 21l-4.35-4.35m1.6-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </span>
-
-                <input wire:model.live="search" type="text" placeholder="{{ __('Search products...') }}"
-                    class="w-full rounded-xl border border-slate-200 dark:border-slate-800
-                       bg-white/80 dark:bg-slate-900/80
-                       pl-10 pr-4 py-2.5 text-sm
-                       text-slate-900 dark:text-white
-                       placeholder-slate-400
-                       backdrop-blur
-                       focus:outline-none focus:ring-2 focus:ring-accent/40">
-            </div>
-
-            {{-- Add --}}
-            <button wire:click="create"
-                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
-                   bg-accent text-white text-sm font-medium
-                   hover:opacity-90 transition">
-                {{-- Heroicon: plus --}}
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                {{ __('Add product') }}
-            </button>
+        <div>
+            <p class="text-xs text-slate-500">{{ __('Total products') }}</p>
+            <p class="text-2xl font-semibold text-slate-900 dark:text-white">
+                {{ $products->count() }}
+            </p>
         </div>
+
+        <flux:icon name="shopping-bag" class="w-8 h-8 text-slate-400" />
+    </button>
+
+    {{-- Active --}}
+    <button
+        wire:click="$set('statusFilter','active')"
+        class="text-left rounded-2xl p-4
+               bg-emerald-500/10
+               flex items-center justify-between transition
+               {{ $statusFilter === 'active'
+                    ? 'ring-2 ring-emerald-500/40'
+                    : 'hover:bg-emerald-500/20' }}">
+
+        <div>
+            <p class="text-xs text-emerald-600">{{ __('Active') }}</p>
+            <p class="text-2xl font-semibold text-emerald-700">
+                {{ $products->where('is_active', true)->count() }}
+            </p>
+        </div>
+
+        <flux:icon name="check-circle" class="w-8 h-8 text-emerald-600" />
+    </button>
+
+    {{-- Inactive --}}
+    <button
+        wire:click="$set('statusFilter','inactive')"
+        class="text-left rounded-2xl p-4
+               bg-slate-100 dark:bg-slate-800
+               flex items-center justify-between transition
+               {{ $statusFilter === 'inactive'
+                    ? 'ring-2 ring-slate-400/40'
+                    : 'hover:bg-slate-200 dark:hover:bg-slate-700' }}">
+
+        <div>
+            <p class="text-xs text-slate-500">{{ __('Inactive') }}</p>
+            <p class="text-2xl font-semibold text-slate-700 dark:text-slate-200">
+                {{ $products->where('is_active', false)->count() }}
+            </p>
+        </div>
+
+        <flux:icon name="x-circle" class="w-8 h-8 text-slate-400" />
+    </button>
+
+</div>
+
+    {{-- Header + Actions --}}
+<div
+    class="rounded-2xl border border-slate-200 dark:border-slate-800
+           bg-white dark:bg-slate-900/90
+           p-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+    {{-- Search --}}
+    <div class="relative w-full sm:w-72">
+        <span class="absolute inset-y-0 left-3 flex items-center text-slate-400">
+            <flux:icon name="magnifying-glass" class="w-4 h-4" />
+        </span>
+
+        <input
+            wire:model.live="search"
+            type="text"
+            placeholder="{{ __('Search products...') }}"
+            class="w-full pl-9 pr-4 py-2 rounded-xl
+                   border border-slate-200 dark:border-slate-800
+                   bg-white dark:bg-slate-900
+                   text-sm
+                   focus:ring-2 focus:ring-accent/40
+                   focus:outline-none">
+    </div>
+
+    {{-- Right --}}
+    <div class="flex items-center gap-3 justify-end">
 
         {{-- Counter --}}
-        <div class="text-sm text-slate-500 dark:text-slate-400">
-            {{ __('Total products') }}
-            <span
-                class="ml-1 inline-flex items-center rounded-md
-                   bg-slate-200/50 dark:bg-slate-800/60
-                   px-2 py-0.5 text-xs font-semibold
-                   text-slate-900 dark:text-white">
-                {{ $this->totalCount ?? count($products) }}
-            </span>
-        </div>
+        <span
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full
+                   text-xs font-medium
+                   bg-slate-100 dark:bg-slate-800
+                   text-slate-600 dark:text-slate-300">
+            <flux:icon name="shopping-bag" class="w-4 h-4" />
+            {{ __('Total') }}: {{ count($products) }}
+        </span>
 
+        {{-- Add --}}
+        <button
+            wire:click="create"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
+                   bg-accent text-white text-sm font-medium
+                   hover:opacity-90 transition">
+            <flux:icon name="plus" class="w-4 h-4" />
+            {{ __('Add product') }}
+        </button>
     </div>
 
+</div>
+
+{{-- Category filter --}}
+<div class="flex flex-col gap-3">
+
+    {{-- Mobile dropdown --}}
+    <div class="sm:hidden">
+        <select
+            wire:model.live="categoryFilter"
+            class="w-full rounded-xl border border-slate-200 dark:border-slate-800
+                   bg-white dark:bg-slate-900 text-sm">
+            <option value="">{{ __('All categories') }}</option>
+            @foreach ($categories as $cat)
+                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    {{-- Desktop chips --}}
+    <div class="hidden sm:flex flex-wrap gap-2">
+        <button
+            wire:click="$set('categoryFilter', null)"
+            class="px-4 py-2 rounded-full text-sm transition
+            {{ is_null($categoryFilter)
+                ? 'bg-accent text-white shadow'
+                : 'bg-slate-100 dark:bg-slate-800 hover:opacity-80' }}">
+            {{ __('All') }}
+        </button>
+
+        @foreach ($categories as $cat)
+            <button
+                wire:click="$set('categoryFilter', {{ $cat->id }})"
+                class="px-4 py-2 rounded-full text-sm transition
+                {{ $categoryFilter === $cat->id
+                    ? 'bg-accent text-white shadow'
+                    : 'bg-slate-100 dark:bg-slate-800 hover:opacity-80' }}">
+                {{ $cat->name }}
+            </button>
+        @endforeach
+    </div>
+
+</div>
+
+{{-- Mobile cards --}}
+<div class="md:hidden space-y-4">
+
+    @forelse ($products as $product)
+        <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800
+                   bg-white dark:bg-slate-900 p-4 space-y-4">
+
+            {{-- Header --}}
+            <div class="flex items-start gap-4">
+                <div class="w-16 h-16 rounded-xl overflow-hidden
+                            bg-slate-100 dark:bg-slate-800
+                            ring-1 ring-slate-200 dark:ring-slate-700">
+                    @if ($product->main_image)
+                        <img src="{{ asset('storage/'.$product->main_image) }}"
+                             class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-slate-400">
+                            —
+                        </div>
+                    @endif
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-slate-900 dark:text-white truncate">
+                        {{ $product->title }}
+                    </h3>
+                    <p class="text-xs text-slate-500 truncate">
+                        {{ $product->category->name ?? __('No category') }}
+                    </p>
+                </div>
+
+                {{-- Status --}}
+                <button
+                    wire:click="toggle({{ $product->id }})"
+                    class="px-3 py-1 rounded-full text-xs font-medium
+                    {{ $product->is_active
+                        ? 'bg-emerald-500/15 text-emerald-600'
+                        : 'bg-slate-500/10 text-slate-500' }}">
+                    {{ $product->is_active ? __('Active') : __('Inactive') }}
+                </button>
+            </div>
+
+            {{-- Meta --}}
+            <div class="flex items-center justify-between text-xs text-slate-500">
+                <span>{{ __('Order') }}: {{ $product->display_order }}</span>
+            </div>
+
+            {{-- Actions --}}
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <button wire:click="view({{ $product->id }})"
+                    class="p-2 rounded-lg text-accent hover:bg-accent/10">
+                    <flux:icon name="eye" class="w-4 h-4" />
+                </button>
+
+                <button wire:click="edit({{ $product->id }})"
+                    class="p-2 rounded-lg text-sky-600 hover:bg-sky-500/10">
+                    <flux:icon name="pencil-square" class="w-4 h-4" />
+                </button>
+
+                <button wire:click="askDelete({{ $product->id }})"
+                    class="p-2 rounded-lg text-red-500 hover:bg-red-500/10">
+                    <flux:icon name="trash" class="w-4 h-4" />
+                </button>
+            </div>
+        </div>
+    @empty
+        <div class="p-6 text-center text-slate-500">
+            {{ __('No products found') }}
+        </div>
+    @endforelse
+
+</div>
 
     {{-- Products table --}}
-    <div
-        class="lg:col-span-1 rounded-2xl overflow-hidden
-                   border border-slate-200 dark:border-slate-800
-                   bg-white dark:bg-slate-900/90">
+<div
+    wire:loading.remove
+    wire:target="search,statusFilter,categoryFilter"
+    class="hidden md:block">
+    
+<div
+    class="rounded-2xl overflow-hidden
+           border border-slate-200 dark:border-slate-800
+           bg-white dark:bg-slate-900/90">
 
-        <table class="w-full text-sm">
-            <thead
-                class="bg-slate-100 text-slate-700
-                       dark:bg-gradient-to-r dark:from-slate-800 dark:to-slate-900
-                       dark:text-slate-200">
-                <tr>
-                    <th class="px-4 py-3 text-left">{{ __('#') }}</th>
-                    <th class="px-4 py-3 text-left">{{ __('Image') }}</th>
-                    <th class="px-4 py-3 text-left">{{ __('Title') }}</th>
-                    <th class="px-4 py-3 text-left">{{ __('Category') }}</th>
-                    <th class="px-4 py-3 text-left">{{ __('Status') }}</th>
-                    <th class="px-4 py-3 text-left">{{ __('Order') }}</th>
-                    <th class="px-4 py-3 text-right">{{ __('Actions') }}</th>
-                </tr>
-            </thead>
+    <table class="w-full text-sm">
+        <thead
+            class="bg-slate-100 dark:bg-slate-800
+                   text-slate-700 dark:text-slate-200">
+            <tr>
+                <th class="px-3 py-3"></th>
+                <th class="px-4 py-3">{{ __('Image') }}</th>
+                <th class="px-4 py-3">{{ __('Title') }}</th>
+                <th class="px-4 py-3">{{ __('Category') }}</th>
+                <th class="px-4 py-3">{{ __('Status') }}</th>
+                <th class="px-4 py-3">{{ __('Order') }}</th>
+                <th class="px-4 py-3 text-right">{{ __('Actions') }}</th>
+            </tr>
+        </thead>
 
-            <tbody x-data x-init="new Sortable($el, {
-                handle: '[data-drag-handle]',
-                animation: 150,
-                onEnd() {
-                    const ids = Array.from($el.children)
-                        .map(el => el.getAttribute('data-id'))
-            
+        <tbody
+            x-data
+            x-init="new Sortable($el,{
+                handle:'[data-drag-handle]',
+                animation:150,
+                onEnd(){
+                    const ids=[...$el.children].map(el=>el.dataset.id)
                     $wire.reorder(ids)
                 }
-            })" class="divide-y divide-slate-100 dark:divide-slate-800">
-                @forelse ($products as $product)
-                    <tr data-id="{{ $product->id }}" wire:key="product-{{ $product->id }}"
-                        class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
-                        <td class="px-2 text-slate-400 cursor-move" data-drag-handle>
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 20 20">
-                                <path
-                                    d="M7 4h2v2H7V4zm4 0h2v2h-2V4zM7 8h2v2H7V8zm4 0h2v2h-2V8zM7 12h2v2H7v-2zm4 0h2v2h-2v-2z" />
-                            </svg>
-                        </td>
+            })"
+            class="divide-y divide-slate-100 dark:divide-slate-800">
 
+            @forelse ($products as $product)
+                <tr
+                    data-id="{{ $product->id }}"
+                    wire:key="product-{{ $product->id }}"
+                    class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
 
-                        <td class="px-4 py-3">
-                            <div
-                                class="w-14 h-14 rounded-lg overflow-hidden
-                bg-slate-100 dark:bg-slate-800
-                ring-1 ring-slate-200 dark:ring-slate-700">
-                                @if ($product->main_image)
-                                    <img src="{{ asset('storage/' . $product->main_image) }}"
-                                        alt="{{ $product->title }}"
-                                        class="w-full h-full object-cover
-                       hover:scale-110 transition-transform duration-300" />
-                                @else
-                                    <div
-                                        class="w-full h-full flex items-center justify-center
-                        text-slate-400 text-xs">
-                                        —
-                                    </div>
-                                @endif
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 font-medium">
-                            {{ $product->title }}
-                        </td>
+                    {{-- Drag --}}
+                    <td class="px-3 text-slate-400 cursor-move" data-drag-handle>
+                        <flux:icon name="bars-3" class="w-5 h-5" />
+                    </td>
 
-                        <td class="px-4 py-3 text-slate-500">
-                            {{ $product->category->name ?? __('—') }}
-                        </td>
+                    {{-- Image --}}
+                    <td class="px-4 py-3">
+                        <div
+                            class="w-14 h-14 rounded-lg overflow-hidden
+                                   bg-slate-100 dark:bg-slate-800
+                                   ring-1 ring-slate-200 dark:ring-slate-700">
+                            @if ($product->main_image)
+                                <img
+                                    src="{{ asset('storage/'.$product->main_image) }}"
+                                    class="w-full h-full object-cover
+                                           hover:scale-110 transition-transform">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-slate-400">
+                                    —
+                                </div>
+                            @endif
+                        </div>
+                    </td>
 
-                        {{-- Status --}}
-                        <td class="px-4 py-3">
-                            <button wire:click="toggle({{ $product->id }})"
-                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full
-               text-xs font-medium transition
-        {{ $product->is_active
-            ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30'
-            : 'bg-slate-500/10 text-slate-500 ring-1 ring-slate-500/30' }}">
-                                {{-- Heroicon: check / x --}}
-                                @if ($product->is_active)
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    {{ __('Active') }}
-                                @else
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                    {{ __('Inactive') }}
-                                @endif
+                    {{-- Title --}}
+                    <td class="px-4 py-3 font-medium text-slate-900 dark:text-white">
+                        {{ $product->title }}
+                    </td>
+
+                    {{-- Category --}}
+                    <td class="px-4 py-3 text-slate-500">
+                        {{ $product->category->name ?? '—' }}
+                    </td>
+
+                    {{-- Status --}}
+                    <td class="px-4 py-3">
+                        <button
+                            wire:click="toggle({{ $product->id }})"
+                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+                                   text-xs font-medium transition
+                                   {{ $product->is_active
+                                       ? 'bg-emerald-500/15 text-emerald-600 ring-1 ring-emerald-500/30'
+                                       : 'bg-slate-500/10 text-slate-500 ring-1 ring-slate-500/30' }}">
+                            @if ($product->is_active)
+                                <flux:icon name="check" class="w-3.5 h-3.5" />
+                                {{ __('Active') }}
+                            @else
+                                <flux:icon name="x-mark" class="w-3.5 h-3.5" />
+                                {{ __('Inactive') }}
+                            @endif
+                        </button>
+                    </td>
+
+                    {{-- Order --}}
+                    <td class="px-4 py-3 text-slate-500">
+                        {{ $product->display_order }}
+                    </td>
+
+                    {{-- Actions --}}
+                    <td class="px-4 py-3 text-right">
+                        <div class="inline-flex items-center gap-2">
+
+                            <button wire:click="view({{ $product->id }})"
+                                class="p-1.5 rounded-lg text-accent hover:bg-accent/10 transition">
+                                <flux:icon name="eye" class="w-4 h-4" />
                             </button>
-                        </td>
 
-                        <td class="px-4 py-3">
-                            {{ $product->display_order }}
-                        </td>
+                            <button wire:click="edit({{ $product->id }})"
+                                class="p-1.5 rounded-lg text-sky-600 hover:bg-sky-500/10 transition">
+                                <flux:icon name="pencil-square" class="w-4 h-4" />
+                            </button>
 
-                        {{-- Actions --}}
-                        <td class="px-4 py-3 text-right">
-                            <div class="inline-flex items-center gap-2">
+                            <button wire:click="askDelete({{ $product->id }})"
+                                class="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 transition">
+                                <flux:icon name="trash" class="w-4 h-4" />
+                            </button>
 
-                                {{-- View --}}
-                                <button wire:click="view({{ $product->id }})"
-                                    class="p-1.5 rounded-lg text-accent
-                   hover:bg-accent/10 transition"
-                                    title="{{ __('View') }}">
-                                    {{-- eye --}}
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12
-                       18 18.75 12 18.75 2.25 12 2.25 12z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                </button>
+                        </div>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" class="px-6 py-10 text-center text-slate-500">
+                        {{ __('No products found') }}
+                    </td>
+                </tr>
+            @endforelse
 
-                                {{-- Edit --}}
-                                <button wire:click="edit({{ $product->id }})"
-                                    class="p-1.5 rounded-lg text-sky-600 dark:text-sky-400
-                   hover:bg-sky-500/10 transition"
-                                    title="{{ __('Edit') }}">
-                                    {{-- pencil --}}
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688
-                       a1.875 1.875 0 112.652 2.652L10.582 16.07
-                       a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685
-                       a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-                                    </svg>
-                                </button>
-
-                                {{-- Delete --}}
-                                <button wire:click="askDelete({{ $product->id }})"
-                                    class="p-1.5 rounded-lg text-red-500 dark:text-red-400
-                   hover:bg-red-500/10 transition"
-                                    title="{{ __('Delete') }}">
-                                    {{-- trash --}}
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21
-                       c.342.052.682.107 1.022.166M5.772 5.79
-                       L6.84 19.673a2.25 2.25 0 002.244 2.077h7.832
-                       a2.25 2.25 0 002.244-2.077L18.228 5.79" />
-                                    </svg>
-                                </button>
-
-                            </div>
-                        </td>
-
-
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-slate-500">
-                            {{ __('No products found') }}
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+        </tbody>
+    </table>
+</div>
+</div>
 
     {{-- Modal --}}
     @if ($showModal)

@@ -70,8 +70,13 @@ new class extends Component {
 }; ?>
 
 <section class="w-full">
-    @include('partials.settings-heading')
-
+    {{-- Page header --}}
+    @include('partials.settings-heading', [
+        'title' => __('Profile'),
+        'description' => __('Update your personal information and email address'),
+        'icon' => 'user-circle',
+    ])
+    
     <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />

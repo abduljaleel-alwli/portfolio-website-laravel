@@ -16,21 +16,7 @@
 
 <style>
     :root {
-        /* --color-dark-background-primary:
-            #0b1220;
-        --color-dark-background-secondary:
-            #050c1a;
-        ;
-        --color-secondary:
-            {{ $settings['colors.secondary'] ?? '#0ea5e9' }}
-        ;
-        --color-accent:
-            {{ $settings['colors.accent'] ?? '#22c55e' }}
-        ;
-        --color-background:
-            {{ $settings['colors.background'] ?? '#0b1220' }}
-        ;
-        */ --v-color-theme-background-primary: #f9fafb;
+        --v-color-theme-background-primary: #f9fafb;
         --v-color-theme-background-secondary: #ffffff;
 
         --v-color-secondary:

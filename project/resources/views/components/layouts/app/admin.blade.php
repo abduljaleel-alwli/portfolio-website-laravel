@@ -42,8 +42,13 @@
 
                 <flux:navlist.item icon="bell" :href="route('admin.notifications')"
                     :current="request()->routeIs('admin.notifications')" wire:navigate>
-                    {{ __('Notifications') }}
+                    <div class="relative flex items-center gap-2">
+                        <span>{{ __('Notifications') }}</span>
+
+                        <x-notifications.notification-badge :count="auth()->user()->unreadNotifications()->count()" />
+                    </div>
                 </flux:navlist.item>
+
 
                 <flux:navlist.item icon="envelope" :href="route('admin.contact-messages')"
                     :current="request()->routeIs('admin.contact-messages')" wire:navigate>
@@ -76,15 +81,15 @@
         <flux:navlist variant="outline">
 
             @role('super-admin')
-                <flux:navlist.item icon="users" :href="route('admin.users')"
-                    :current="request()->routeIs('admin.users')" wire:navigate>
-                    {{ __('Users') }}
-                </flux:navlist.item>
+            <flux:navlist.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')"
+                wire:navigate>
+                {{ __('Users') }}
+            </flux:navlist.item>
 
-                <flux:navlist.item icon="clipboard-document-list" :href="route('admin.audit-logs')"
-                    :current="request()->routeIs('admin.audit-logs')" wire:navigate>
-                    {{ __('System Logs') }}
-                </flux:navlist.item>
+            <flux:navlist.item icon="clipboard-document-list" :href="route('admin.audit-logs')"
+                :current="request()->routeIs('admin.audit-logs')" wire:navigate>
+                {{ __('System Logs') }}
+            </flux:navlist.item>
             @endrole
 
             <flux:navlist.item icon="cog-6-tooth" :href="route('admin.settings')"
@@ -110,8 +115,7 @@
                 <flux:menu.radio.group>
                     <div class="p-0 text-sm font-normal">
                         <div class="flex items-center gap-2 px-1 py-1.5">
-                            <span
-                                class="flex h-8 w-8 items-center justify-center rounded-lg
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg
                                      bg-neutral-200 dark:bg-neutral-700">
                                 {{ auth()->user()->initials() }}
                             </span>

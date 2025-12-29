@@ -107,211 +107,184 @@ new class extends Component {
 ?>
 
 <div class="space-y-6">
-    @include('partials.settings-heading', [
-        'title' => __('Contact page'),
-        'description' => __('Manage contact page information'),
-    ])
 
-    <div class="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-        {{-- Heroicon: envelope --}}
-        <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5A2.25 2.25 0 0119.5 19.5h-15
-               A2.25 2.25 0 012.25 17.25V6.75
-               M21.75 6.75l-9.75 6-9.75-6" />
-        </svg>
-        {{ __('Main contact information') }}
-    </div>
+    {{-- Page heading --}}
+@include('partials.settings-heading', [
+    'title' => __('Contact page'),
+    'description' => __('Manage contact page information'),
+    'icon' => 'envelope',
+])
 
-    {{-- Main info --}}
-    <div
-        class="rounded-2xl border border-slate-200 dark:border-slate-800
-               bg-white dark:bg-slate-900/90 p-6 space-y-6">
+    {{-- ================= Main Contact Info ================= --}}
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-800
+                bg-white dark:bg-slate-900/90 overflow-hidden">
 
-        {{-- Title --}}
-        <div>
-            <label class="block text-xs text-slate-500 mb-1">
-                {{ __('Title') }}
-            </label>
-            <input wire:model.defer="title" class="input w-full @error('title') ring-1 ring-red-500 @enderror"
-                placeholder="{{ __('Contact page title') }}" />
-            @error('title')
-                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-
-        {{-- Description --}}
-        <div>
-            <label class="block text-xs text-slate-500 mb-1">
-                {{ __('Description') }}
-            </label>
-            <textarea wire:model.defer="description" class="textarea w-full @error('description') ring-1 ring-red-500 @enderror"
-                rows="4" placeholder="{{ __('Short description shown on the contact page') }}"></textarea>
-            @error('description')
-                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {{-- Email --}}
-            <div>
-                <label class="block text-xs text-slate-500 mb-1">
-                    {{ __('Email recipient') }}
-                </label>
-                <input wire:model.defer="email_to" class="input w-full @error('email_to') ring-1 ring-red-500 @enderror"
-                    placeholder="info@example.com" />
-                @error('email_to')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-
-            {{-- Phone --}}
-            <div>
-                <label class="block text-xs text-slate-500 mb-1">
-                    {{ __('Phone number') }}
-                </label>
-                <input wire:model.defer="phone" class="input w-full @error('phone') ring-1 ring-red-500 @enderror"
-                    placeholder="+970 599 000 000" />
-                @error('phone')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-
-            {{-- Location --}}
-            <div>
-                <label class="block text-xs text-slate-500 mb-1">
-                    {{ __('Location') }}
-                </label>
-                <input wire:model.defer="location" class="input w-full @error('location') ring-1 ring-red-500 @enderror"
-                    placeholder="{{ __('City, Country') }}" />
-                @error('location')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-
-            {{-- Email subject --}}
-            <div>
-                <label class="block text-xs text-slate-500 mb-1">
-                    {{ __('Email subject') }}
-                </label>
-                <input wire:model.defer="email_subject"
-                    class="input w-full @error('email_subject') ring-1 ring-red-500 @enderror"
-                    placeholder="{{ __('New contact message') }}" />
-                @error('email_subject')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-        </div>
-
-        {{-- Map --}}
-        <div>
-            <label class="block text-xs text-slate-500 mb-1">
-                {{ __('Google Maps URL') }}
-            </label>
-            <input wire:model.defer="map_url" class="input w-full @error('map_url') ring-1 ring-red-500 @enderror"
-                placeholder="https://maps.google.com/..." />
-            @error('map_url')
-                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-    </div>
-
-    {{-- Social links --}}
-    <div
-        class="rounded-2xl border border-slate-200 dark:border-slate-800
-               bg-white dark:bg-slate-900/90 overflow-hidden">
-
-        <div
-            class="px-6 py-4 border-b border-slate-200 dark:border-slate-800
-           flex items-center justify-between">
-
-            <div class="flex items-center gap-2">
-                {{-- Heroicon: share --}}
-                <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+        {{-- Header --}}
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-accent/80" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 12a2.25 2.25 0 104.5 0
-                   2.25 2.25 0 00-4.5 0zm6.75-4.5
-                   a2.25 2.25 0 104.5 0
-                   2.25 2.25 0 00-4.5 0zm0 9
-                   a2.25 2.25 0 104.5 0
-                   2.25 2.25 0 00-4.5 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M21.75 6.75v10.5A2.25 2.25 0 0119.5 19.5h-15
+                           A2.25 2.25 0 012.25 17.25V6.75
+                           M21.75 6.75l-9.75 6-9.75-6" />
                 </svg>
 
-                <h3 class="text-base font-semibold text-slate-900 dark:text-white">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white">
+                        {{ __('Main contact information') }}
+                    </h3>
+                    <p class="text-xs text-slate-500">
+                        {{ __('Basic details shown on the contact page') }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Body --}}
+        <div class="p-6 space-y-6">
+
+            {{-- Title --}}
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">{{ __('Title') }}</label>
+                <input wire:model.defer="title"
+                    class="input w-full focus:ring-accent/40 @error('title') ring-1 ring-red-500 @enderror"
+                    placeholder="{{ __('Contact page title') }}" />
+                @error('title') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            {{-- Description --}}
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">{{ __('Description') }}</label>
+                <textarea wire:model.defer="description"
+                    class="textarea w-full focus:ring-accent/40 @error('description') ring-1 ring-red-500 @enderror"
+                    rows="3"
+                    placeholder="{{ __('Short description shown on the contact page') }}"></textarea>
+                @error('description') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">{{ __('Email recipient') }}</label>
+                    <input wire:model.defer="email_to"
+                        class="input w-full @error('email_to') ring-1 ring-red-500 @enderror"
+                        placeholder="info@example.com" />
+                    @error('email_to') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">{{ __('Phone number') }}</label>
+                    <input wire:model.defer="phone"
+                        class="input w-full @error('phone') ring-1 ring-red-500 @enderror"
+                        placeholder="+970 599 000 000" />
+                    @error('phone') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">{{ __('Location') }}</label>
+                    <input wire:model.defer="location"
+                        class="input w-full @error('location') ring-1 ring-red-500 @enderror"
+                        placeholder="{{ __('City, Country') }}" />
+                    @error('location') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">{{ __('Email subject') }}</label>
+                    <input wire:model.defer="email_subject"
+                        class="input w-full @error('email_subject') ring-1 ring-red-500 @enderror"
+                        placeholder="{{ __('New contact message') }}" />
+                    @error('email_subject') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">{{ __('Google Maps URL') }}</label>
+                <input wire:model.defer="map_url"
+                    class="input w-full @error('map_url') ring-1 ring-red-500 @enderror"
+                    placeholder="https://maps.google.com/..." />
+                @error('map_url') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+        </div>
+    </div>
+
+    {{-- ================= Social Links ================= --}}
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-800
+                bg-white dark:bg-slate-900/90 overflow-hidden">
+
+        {{-- Header --}}
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800
+                    flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-accent/80" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7.5 12a2.25 2.25 0 104.5 0
+                           2.25 2.25 0 00-4.5 0zm6.75-4.5
+                           a2.25 2.25 0 104.5 0
+                           2.25 2.25 0 00-4.5 0zm0 9
+                           a2.25 2.25 0 104.5 0
+                           2.25 2.25 0 00-4.5 0z" />
+                </svg>
+                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">
                     {{ __('Social links') }}
                 </h3>
             </div>
 
             <button wire:click="addSocial"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm
-               bg-accent text-white hover:opacity-90 transition">
-                {{-- Heroicon: plus --}}
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                       bg-accent text-white hover:opacity-90 transition">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
                 {{ __('Add link') }}
             </button>
         </div>
 
-
+        {{-- Body --}}
         <div class="p-6 space-y-4">
             @forelse ($social_links as $index => $social)
-                @php
-                    $hasError =
-                        $errors->has("social_links.$index.platform") ||
-                        $errors->has("social_links.$index.url") ||
-                        $errors->has("social_links.$index.icon_type") ||
-                        $errors->has("social_links.$index.icon_value");
-                @endphp
+                <div class="rounded-xl border border-slate-200 dark:border-slate-800
+                            bg-slate-50 dark:bg-slate-800/40">
 
-                <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
-                    {{-- Heroicon: link --}}
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 016.364 6.364l-3.182 3.182
-               a4.5 4.5 0 01-6.364-6.364l1.182-1.182" />
-                    </svg>
-                    {{ __('Social link') }} #{{ $index + 1 }}
-                </div>
+                    <div class="flex items-center justify-between px-4 py-3 border-b
+                                border-slate-200 dark:border-slate-800">
+                        <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            {{ __('Social link') }} #{{ $index + 1 }}
+                        </span>
 
-                <div
-                    class="rounded-xl p-5 space-y-4 border transition
-                    {{ $hasError
-                        ? 'border-red-300 bg-red-50 dark:bg-red-950/30 ring-2 ring-red-500'
-                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50' }}">
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">
-                                {{ __('Platform') }}
-                            </label>
-                            <input wire:model.defer="social_links.{{ $index }}.platform"
-                                class="input w-full
-                                @error('social_links.' . $index . '.platform') ring-1 ring-red-500 @enderror"
-                                placeholder="facebook / whatsapp" />
-                            @error('social_links.' . $index . '.platform')
-                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">
-                                {{ __('URL') }}
-                            </label>
-                            <input wire:model.defer="social_links.{{ $index }}.url"
-                                class="input w-full
-                                @error('social_links.' . $index . '.url') ring-1 ring-red-500 @enderror"
-                                placeholder="https://..." />
-                            @error('social_links.' . $index . '.url')
-                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <button wire:click="removeSocial({{ $index }})"
+                            class="text-xs text-red-500 hover:text-red-600 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            {{ __('Remove') }}
+                        </button>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-4 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">{{ __('Platform') }}</label>
+                                <input wire:model.defer="social_links.{{ $index }}.platform"
+                                    class="input w-full" placeholder="facebook / whatsapp" />
+                            </div>
+
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">{{ __('URL') }}</label>
+                                <input wire:model.defer="social_links.{{ $index }}.url"
+                                    class="input w-full" placeholder="https://..." />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div>
-        <label class="block text-xs text-slate-500 mb-1">
-            {{ __('Icon type') }}
-        </label>
-        <select wire:model.defer="social_links.{{ $index }}.icon_type"
+        <label class="block text-xs text-slate-500 mb-1">{{ __('Icon type') }}</label>
+        <select wire:model.live="social_links.{{ $index }}.icon_type"
             class="input w-full">
             <option value="class">{{ __('Font Awesome class') }}</option>
             <option value="svg">{{ __('SVG code') }}</option>
@@ -319,69 +292,77 @@ new class extends Component {
     </div>
 
     <div>
-        <label class="block text-xs text-slate-500 mb-1">
-            {{ __('Icon value') }}
-        </label>
-        <textarea wire:model.defer="social_links.{{ $index }}.icon_value"
+        <label class="block text-xs text-slate-500 mb-1">{{ __('Icon value') }}</label>
+        <textarea wire:model.live="social_links.{{ $index }}.icon_value"
             class="textarea w-full font-mono text-xs"
             rows="2"
             placeholder="{{ __('Icon class or SVG code') }}"></textarea>
     </div>
 </div>
 
+{{-- Icon Preview --}}
+<div class="flex items-center gap-3 pt-2">
+    <span class="text-xs text-slate-500">
+        {{ __('Preview') }}
+    </span>
 
-<div class="flex justify-end">
-    <button wire:click="removeSocial({{ $index }})"
-        class="inline-flex items-center gap-1 text-xs text-red-500 hover:underline">
-        {{-- Heroicon: trash --}}
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21
-                   c.342.052.682.107 1.022.166M5.772 5.79
-                   L6.84 19.673a2.25 2.25 0 002.244 2.077h7.832
-                   a2.25 2.25 0 002.244-2.077L18.228 5.79" />
-        </svg>
-        {{ __('Remove link') }}
-    </button>
+    <div class="w-10 h-10 rounded-lg
+                flex items-center justify-center
+                border border-slate-200 dark:border-slate-700
+                bg-white dark:bg-slate-900">
+
+        @php
+            $type = $social['icon_type'] ?? null;
+            $value = $social['icon_value'] ?? null;
+        @endphp
+
+        @if ($type === 'class' && filled($value))
+            <i class="{{ $value }} text-lg text-slate-700 dark:text-slate-200"></i>
+
+        @elseif ($type === 'svg' && filled($value))
+            <div class="w-5 h-5 text-slate-700 dark:text-slate-200">
+                {!! $value !!}
+            </div>
+
+        @else
+            <span class="text-xs text-slate-400">—</span>
+        @endif
+    </div>
 </div>
 
+                    </div>
                 </div>
             @empty
-                <div class="text-sm text-slate-500 text-center py-6">
+                <p class="text-sm text-slate-500 text-center py-6">
                     {{ __('No social links added yet') }}
-                </div>
+                </p>
             @endforelse
         </div>
     </div>
 
-    {{-- Sticky save --}}
-    <div
-        class="sticky bottom-0 z-10
-               bg-white/90 dark:bg-slate-900/90
-               backdrop-blur
-               border-t border-slate-200 dark:border-slate-800
-               px-6 py-4 flex justify-end">
+    {{-- ================= Sticky Save ================= --}}
+    <div class="sticky bottom-0 z-10
+                bg-white/90 dark:bg-slate-900/90 backdrop-blur
+                border-t border-slate-200 dark:border-slate-800
+                px-6 py-4 flex justify-end">
 
         <button wire:click="save" wire:loading.attr="disabled" wire:target="save"
-            class="px-6 py-2 rounded-xl text-sm
-                   bg-accent text-white
+            class="px-6 py-2 rounded-xl text-sm bg-accent text-white
                    hover:opacity-90 transition
                    disabled:opacity-50 disabled:cursor-not-allowed
                    flex items-center gap-2">
 
-            <svg wire:loading wire:target="save" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 animate-spin"
-                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg wire:loading wire:target="save"
+                class="w-4 h-4 animate-spin" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
                 <circle cx="12" cy="12" r="10" stroke-width="4" class="opacity-25" />
                 <path d="M12 2a10 10 0 0110 10" stroke-width="4" class="opacity-75" />
             </svg>
 
-            <span wire:loading.remove wire:target="save">
-                {{ __('Save changes') }}
-            </span>
-            <span wire:loading wire:target="save">
-                {{ __('Saving...') }}
-            </span>
+            <span wire:loading.remove wire:target="save">{{ __('Save changes') }}</span>
+            <span wire:loading wire:target="save">{{ __('Saving...') }}</span>
         </button>
     </div>
+
 </div>
+

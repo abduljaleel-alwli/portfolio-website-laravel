@@ -2,107 +2,124 @@
 
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
-use App\Services\Settings\SettingsService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Artisan;
+use App\Services\Settings\SettingsService;
 
 new class extends Component {
     use WithFileUploads;
     use AuthorizesRequests;
 
+    /* =========================
+       UI State
+    ========================= */
     public string $tab = 'general';
 
-    // General
+    /* =========================
+       General
+    ========================= */
     public string $site_name = '';
     public string $site_description = '';
 
-    // Branding
+    /* =========================
+       Branding
+    ========================= */
     public $logo;
     public $favicon;
     public ?string $current_logo = null;
     public ?string $current_favicon = null;
 
-    // Colors
+    /* =========================
+       Colors
+    ========================= */
     public string $secondary_color = '';
     public string $accent_color = '';
     public string $background_color = '';
 
-    // SEO
+    /* =========================
+       SEO
+    ========================= */
     public string $meta_title = '';
     public string $meta_description = '';
     public string $keywords = '';
 
+    /* =========================
+       Lifecycle
+    ========================= */
     public function mount(SettingsService $settings): void
     {
-        $this->site_name = $settings->get('site_name', '');
-        $this->site_description = $settings->get('site_description', '');
+        // Authorization (super-admin bypass handled globally)
+        $this->authorize('access-dashboard');
 
-        $this->secondary_color = $settings->get('colors.secondary', '');
-        $this->accent_color = $settings->get('colors.accent', '');
-        $this->background_color = $settings->get('colors.background', '');
+        // General
+        $this->site_name        = (string) $settings->get('site_name', '');
+        $this->site_description = (string) $settings->get('site_description', '');
 
-        $this->meta_title = $settings->get('seo.meta_title', '');
-        $this->meta_description = $settings->get('seo.meta_description', '');
-        $this->keywords = $settings->get('seo.keywords', '');
+        // Colors
+        $this->secondary_color  = (string) $settings->get('colors.secondary', '');
+        $this->accent_color     = (string) $settings->get('colors.accent', '');
+        $this->background_color = (string) $settings->get('colors.background', '');
 
-        // 👇 branding previews
-        $this->current_logo = $settings->get('branding.logo');
+        // SEO
+        $this->meta_title       = (string) $settings->get('seo.meta_title', '');
+        $this->meta_description = (string) $settings->get('seo.meta_description', '');
+        $this->keywords         = (string) $settings->get('seo.keywords', '');
+
+        // Branding (previews)
+        $this->current_logo    = $settings->get('branding.logo');
         $this->current_favicon = $settings->get('branding.favicon');
     }
 
-    /**
-     * Save all settings and show toast notification.
-     */
+    /* =========================
+       Save All Settings
+    ========================= */
     public function save(SettingsService $settings): void
     {
-        // General settings
+        // General
         $settings->set('site_name', $this->site_name, 'string', 'general');
         $settings->set('site_description', $this->site_description, 'text', 'general');
 
-        // Branding settings
+        // Branding
         if ($this->logo) {
             $path = $this->logo->store('branding', 'public');
             $settings->set('branding.logo', $path, 'image', 'branding');
+            $this->current_logo = $path;
         }
 
         if ($this->favicon) {
             $path = $this->favicon->store('branding', 'public');
             $settings->set('branding.favicon', $path, 'image', 'branding');
+            $this->current_favicon = $path;
         }
 
-        // Color settings
+        // Colors
         $settings->set('colors.secondary', $this->secondary_color, 'color', 'colors');
         $settings->set('colors.accent', $this->accent_color, 'color', 'colors');
         $settings->set('colors.background', $this->background_color, 'color', 'colors');
 
-        // SEO settings
+        // SEO
         $settings->set('seo.meta_title', $this->meta_title, 'string', 'seo');
         $settings->set('seo.meta_description', $this->meta_description, 'text', 'seo');
         $settings->set('seo.keywords', $this->keywords, 'text', 'seo');
 
-        // Toast notification (project-wide standard)
-        $this->js(
-            "
-            window.dispatchEvent(
-                new CustomEvent('toast', {
-                    detail: {
-                        type: 'success',
-                        message: '" .
-                __('Settings have been saved successfully') .
-                "'
-                    }
-                })
-            );
-        ",
+        // Toast (project standard)
+        $this->dispatch(
+            'toast',
+            message: __('Settings have been saved successfully'),
+            type: 'success'
         );
     }
 
+    /* =========================
+       System Tools
+    ========================= */
+
     /**
-     * Run: php artisan storage:link
+     * php artisan storage:link
      */
     public function storageLink(): void
     {
-        $this->authorize('access-dashboard'); // أو super-admin فقط لو حاب
+        $this->authorize('access-dashboard');
 
         try {
             Artisan::call('storage:link');
@@ -114,7 +131,7 @@ new class extends Component {
     }
 
     /**
-     * Run: php artisan cache:clear
+     * php artisan cache:clear (+ config & view)
      */
     public function clearCache(): void
     {
@@ -131,430 +148,235 @@ new class extends Component {
         }
     }
 
-    /**
-     * Toast helpers (consistent with your project)
-     */
+    /* =========================
+       Toast Helpers
+       (consistent with project)
+    ========================= */
     protected function toastSuccess(string $message): void
     {
         $this->js("
-            window.dispatchEvent(new CustomEvent('toast', {
-                detail: { type: 'success', message: '{$message}' }
-            }));
+            window.dispatchEvent(
+                new CustomEvent('toast', {
+                    detail: { type: 'success', message: '{$message}' }
+                })
+            );
         ");
     }
 
     protected function toastError(string $message): void
     {
         $this->js("
-            window.dispatchEvent(new CustomEvent('toast', {
-                detail: { type: 'error', message: '{$message}' }
-            }));
+            window.dispatchEvent(
+                new CustomEvent('toast', {
+                    detail: { type: 'error', message: '{$message}' }
+                })
+            );
         ");
     }
 };
 
 ?>
+<div class="space-y-8">
 
-
-<div class="space-y-6">
-
-    {{-- Page heading --}}
+    {{-- ================= HEADER ================= --}}
     @include('partials.settings-heading', [
-        'title' => __('Settings'),
-        'description' => __('Manage global site settings'),
-    ])
+    'title' => __('Settings'),
+    'description' => __('Manage global site configuration'),
+    'icon' => 'cog-6-tooth',
+])
 
-    {{-- Validation summary --}}
-    @if ($errors->any())
-        <div
-            class="rounded-xl border border-red-200 bg-red-50
-                   dark:border-red-900 dark:bg-red-950/30
-                   p-4 text-sm text-red-700 dark:text-red-400">
-            <ul class="list-disc list-inside space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
-    {{-- Tabs --}}
-    <div class="flex gap-2 flex-wrap
-               border-b border-slate-200 dark:border-slate-800 pb-2">
-
+    {{-- ================= TABS ================= --}}
+    <div class="flex flex-wrap gap-2">
         @foreach ([
-        'general' => __('General'),
-        'branding' => __('Branding'),
-        'colors' => __('Colors'),
-        'seo' => __('SEO'),
-        'system' => __('System'),
-    ] as $key => $label)
-            <button wire:click="$set('tab','{{ $key }}')"
-                class="px-4 py-2 rounded-xl text-sm font-medium transition
+            'general'  => ['label' => __('General'),  'icon' => 'adjustments-horizontal'],
+            'branding' => ['label' => __('Branding'), 'icon' => 'photo'],
+            'colors'   => ['label' => __('Colors'),   'icon' => 'paint-brush'],
+            'seo'      => ['label' => __('SEO'),      'icon' => 'magnifying-glass'],
+            'system'   => ['label' => __('System'),   'icon' => 'server'],
+        ] as $key => $t)
+            <button
+                wire:click="$set('tab','{{ $key }}')"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm transition
                 {{ $tab === $key
                     ? 'bg-accent text-white shadow'
-                    : 'bg-slate-200/60 text-slate-700
-                                                                                                                                                                                       hover:bg-slate-300/60
-                                                                                                                                                                                       dark:bg-slate-800 dark:text-slate-300
-                                                                                                                                                                                       dark:hover:bg-slate-700' }}">
-                {{ $label }}
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:opacity-80' }}">
+
+                <flux:icon name="{{ $t['icon'] }}" class="w-4 h-4"/>
+                {{ $t['label'] }}
             </button>
         @endforeach
     </div>
 
-    {{-- Content card --}}
+    {{-- ================= CONTENT CARD ================= --}}
     <div
         class="rounded-2xl border border-slate-200 dark:border-slate-800
                bg-white dark:bg-slate-900/90
                p-6 space-y-6">
 
-        {{-- ================= GENERAL ================= --}}
+        {{-- ========== GENERAL ========== --}}
         @if ($tab === 'general')
-            <div class="space-y-4">
-
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-xs text-slate-500 mb-1">
-                        {{ __('Site name') }}
-                    </label>
-                    <input type="text" wire:model.defer="site_name"
-                        class="input w-full @error('site_name') ring-1 ring-red-500 @enderror"
-                        placeholder="{{ __('Site name') }}" />
-                    @error('site_name')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
+                    <label class="text-xs text-slate-500">{{ __('Site name') }}</label>
+                    <input wire:model.defer="site_name" class="input w-full mt-1">
                 </div>
 
-                <div>
-                    <label class="block text-xs text-slate-500 mb-1">
-                        {{ __('Site description') }}
-                    </label>
+                <div class="md:col-span-2">
+                    <label class="text-xs text-slate-500">{{ __('Site description') }}</label>
                     <textarea wire:model.defer="site_description"
-                        class="textarea w-full @error('site_description') ring-1 ring-red-500 @enderror" rows="3"
-                        placeholder="{{ __('Site description') }}"></textarea>
-                    @error('site_description')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
+                              rows="3"
+                              class="textarea w-full mt-1"></textarea>
                 </div>
-
             </div>
         @endif
 
-        {{-- ================= BRANDING ================= --}}
+        {{-- ========== BRANDING ========== --}}
         @if ($tab === 'branding')
-            <div class="space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                {{-- ========== Logo ========== --}}
-                <div class="space-y-3">
-                    <label class="flex items-center gap-1 text-xs font-medium text-slate-500">
+                {{-- Logo --}}
+                <div
+                    class="rounded-xl border border-slate-200 dark:border-slate-800
+                           p-4 space-y-3">
+                    <div class="flex items-center gap-2 text-sm font-medium">
+                        <flux:icon.photo class="w-4 h-4 text-slate-400"/>
                         {{ __('Logo') }}
+                    </div>
 
-                        {{-- Tooltip --}}
-                        <div class="relative inline-flex group">
-                            <svg class="w-4 h-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-help"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M11.25 11.25h1.5v5.25h-1.5v-5.25z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h.008v.008H12V7.5z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
-                            </svg>
+                    <input type="file" wire:model="logo">
 
-
-                            <div
-                                class="absolute z-20 bottom-full mb-2 left-1/2 -translate-x-1/2
-                               w-64 rounded-xl
-                               bg-white dark:bg-slate-900
-                               border border-slate-200 dark:border-slate-700
-                               shadow-lg
-                               p-3 text-xs text-slate-600 dark:text-slate-300
-                               opacity-0 invisible
-                               group-hover:opacity-100 group-hover:visible
-                               transition">
-
-                                <p class="font-medium text-slate-700 dark:text-slate-200 mb-1">
-                                    {{ __('Recommended logo specs') }}
-                                </p>
-
-                                <ul class="list-disc list-inside space-y-1">
-                                    <li>{{ __('Width: 300–600px') }}</li>
-                                    <li>{{ __('Height: up to 200px') }}</li>
-                                    <li>{{ __('Format: PNG / SVG (transparent)') }}</li>
-                                    <li>{{ __('Max size: 1MB') }}</li>
-                                </ul>
-
-                                <div
-                                    class="absolute top-full left-1/2 -translate-x-1/2
-                                   w-3 h-3 bg-white dark:bg-slate-900
-                                   border-b border-r border-slate-200 dark:border-slate-700
-                                   rotate-45">
-                                </div>
-                            </div>
-                        </div>
-                    </label>
-
-                    <input type="file" wire:model="logo" class="text-sm text-slate-500" />
-
-                    {{-- Preview --}}
                     @if ($logo || $current_logo)
                         <div
-                            class="mt-4 inline-flex flex-col items-center gap-2
-                           rounded-2xl border border-slate-200 dark:border-slate-800
-                           bg-slate-50 dark:bg-slate-800/50
-                           p-4">
-
-                            <span class="text-[11px] uppercase tracking-wide text-slate-400">
-                                {{ $logo ? __('New logo preview') : __('Current logo') }}
-                            </span>
-
-                            <div
-                                class="relative w-48 h-24 flex items-center justify-center
-                               rounded-xl overflow-hidden
-                               ring-1 ring-slate-200 dark:ring-slate-700
-                               bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%,transparent_75%,#e5e7eb_75%,#e5e7eb),linear-gradient(45deg,#e5e7eb_25%,transparent_25%,transparent_75%,#e5e7eb_75%,#e5e7eb)]
-                               bg-[length:16px_16px]
-                               bg-[position:0_0,8px_8px]">
-
-                                <img src="{{ $logo ? $logo->temporaryUrl() : asset('storage/' . $current_logo) }}"
-                                    class="max-h-16 object-contain
-                                   transition-transform duration-300
-                                   hover:scale-105"
-                                    alt="Logo preview">
-                            </div>
+                            class="mt-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800
+                                   flex justify-center">
+                            <img
+                                src="{{ $logo ? $logo->temporaryUrl() : asset('storage/'.$current_logo) }}"
+                                class="h-16 object-contain">
                         </div>
                     @endif
-
-                    @error('logo')
-                        <p class="text-xs text-red-600">{{ $message }}</p>
-                    @enderror
                 </div>
 
-                {{-- ========== Favicon ========== --}}
-                <div class="space-y-3">
-                    <label class="flex items-center gap-1 text-xs font-medium text-slate-500">
+                {{-- Favicon --}}
+                <div
+                    class="rounded-xl border border-slate-200 dark:border-slate-800
+                           p-4 space-y-3">
+                    <div class="flex items-center gap-2 text-sm font-medium">
+                        <flux:icon.star class="w-4 h-4 text-slate-400"/>
                         {{ __('Favicon') }}
+                    </div>
 
-                        {{-- Tooltip --}}
-                        <div class="relative inline-flex group">
-                            <svg class="w-4 h-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-help"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M11.25 11.25h1.5v5.25h-1.5v-5.25z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h.008v.008H12V7.5z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
-                            </svg>
+                    <input type="file" wire:model="favicon">
 
-
-                            <div
-                                class="absolute z-20 bottom-full mb-2 left-1/2 -translate-x-1/2
-                               w-64 rounded-xl
-                               bg-white dark:bg-slate-900
-                               border border-slate-200 dark:border-slate-700
-                               shadow-lg
-                               p-3 text-xs text-slate-600 dark:text-slate-300
-                               opacity-0 invisible
-                               group-hover:opacity-100 group-hover:visible
-                               transition">
-
-                                <p class="font-medium text-slate-700 dark:text-slate-200 mb-1">
-                                    {{ __('Recommended favicon specs') }}
-                                </p>
-
-                                <ul class="list-disc list-inside space-y-1">
-                                    <li>{{ __('Size: 32×32 or 64×64') }}</li>
-                                    <li>{{ __('Square image') }}</li>
-                                    <li>{{ __('Format: PNG / ICO / SVG') }}</li>
-                                    <li>{{ __('Max size: 200KB') }}</li>
-                                </ul>
-
-                                <div
-                                    class="absolute top-full left-1/2 -translate-x-1/2
-                                   w-3 h-3 bg-white dark:bg-slate-900
-                                   border-b border-r border-slate-200 dark:border-slate-700
-                                   rotate-45">
-                                </div>
-                            </div>
-                        </div>
-                    </label>
-
-                    <input type="file" wire:model="favicon" class="text-sm text-slate-500" />
-
-                    {{-- Preview --}}
                     @if ($favicon || $current_favicon)
                         <div
-                            class="mt-4 inline-flex flex-col items-center gap-2
-                           rounded-2xl border border-slate-200 dark:border-slate-800
-                           bg-slate-50 dark:bg-slate-800/50
-                           p-4">
-
-                            <span class="text-[11px] uppercase tracking-wide text-slate-400">
-                                {{ $favicon ? __('New favicon preview') : __('Current favicon') }}
-                            </span>
-
-                            <div
-                                class="relative w-16 h-16 flex items-center justify-center
-                               rounded-xl overflow-hidden
-                               ring-1 ring-slate-200 dark:ring-slate-700
-                               bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%,transparent_75%,#e5e7eb_75%,#e5e7eb),linear-gradient(45deg,#e5e7eb_25%,transparent_25%,transparent_75%,#e5e7eb_75%,#e5e7eb)]
-                               bg-[length:16px_16px]
-                               bg-[position:0_0,8px_8px]">
-
-                                <img src="{{ $favicon ? $favicon->temporaryUrl() : asset('storage/' . $current_favicon) }}"
-                                    class="max-h-10 max-w-10 object-contain
-                                   transition-transform duration-300
-                                   hover:scale-110"
-                                    alt="Favicon preview">
-                            </div>
+                            class="mt-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800
+                                   flex justify-center">
+                            <img
+                                src="{{ $favicon ? $favicon->temporaryUrl() : asset('storage/'.$current_favicon) }}"
+                                class="h-10 w-10 object-contain">
                         </div>
                     @endif
-
-                    @error('favicon')
-                        <p class="text-xs text-red-600">{{ $message }}</p>
-                    @enderror
                 </div>
 
             </div>
         @endif
 
-
-
-
-        {{-- ================= COLORS ================= --}}
+        {{-- ========== COLORS ========== --}}
         @if ($tab === 'colors')
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 <div>
-                    <label class="block text-xs text-slate-500 mb-1">
-                        {{ __('Secondary color') }}
-                    </label>
-                    <input type="color" wire:model.defer="secondary_color" class="w-full h-10 rounded-lg border" />
-                    @error('secondary_color')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
+                    <label class="text-xs text-slate-500">{{ __('Secondary color') }}</label>
+                    <input type="color" wire:model.defer="secondary_color"
+                           class="w-full h-10 rounded-lg border mt-1">
                 </div>
 
                 <div>
-                    <label class="block text-xs text-slate-500 mb-1">
-                        {{ __('Accent color') }}
-                    </label>
-                    <input type="color" wire:model.defer="accent_color" class="w-full h-10 rounded-lg border" />
-                    @error('accent_color')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
+                    <label class="text-xs text-slate-500">{{ __('Accent color') }}</label>
+                    <input type="color" wire:model.defer="accent_color"
+                           class="w-full h-10 rounded-lg border mt-1">
                 </div>
 
                 <div>
-                    <label class="block text-xs text-slate-500 mb-1">
-                        {{ __('Background color') }}
-                    </label>
-                    <input type="color" wire:model.defer="background_color" class="w-full h-10 rounded-lg border" />
-                    @error('background_color')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
+                    <label class="text-xs text-slate-500">{{ __('Background color') }}</label>
+                    <input type="color" wire:model.defer="background_color"
+                           class="w-full h-10 rounded-lg border mt-1">
                 </div>
 
             </div>
         @endif
 
-        {{-- ================= SEO ================= --}}
+        {{-- ========== SEO ========== --}}
         @if ($tab === 'seo')
             <div class="space-y-4">
 
                 <div>
-                    <label class="block text-xs text-slate-500 mb-1">
-                        {{ __('Meta title') }}
-                    </label>
-                    <input type="text" wire:model.defer="meta_title"
-                        class="input w-full @error('meta_title') ring-1 ring-red-500 @enderror"
-                        placeholder="{{ __('Meta title') }}" />
-                    @error('meta_title')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
+                    <label class="text-xs text-slate-500">{{ __('Meta title') }}</label>
+                    <input wire:model.defer="meta_title"
+                           class="input w-full mt-1">
                 </div>
 
                 <div>
-                    <label class="block text-xs text-slate-500 mb-1">
-                        {{ __('Meta description') }}
-                    </label>
+                    <label class="text-xs text-slate-500">{{ __('Meta description') }}</label>
                     <textarea wire:model.defer="meta_description"
-                        class="textarea w-full @error('meta_description') ring-1 ring-red-500 @enderror" rows="3"
-                        placeholder="{{ __('Meta description') }}"></textarea>
-                    @error('meta_description')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
+                              rows="3"
+                              class="textarea w-full mt-1"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-xs text-slate-500 mb-1">
-                        {{ __('Keywords') }}
-                    </label>
-                    <textarea wire:model.defer="keywords" class="textarea w-full @error('keywords') ring-1 ring-red-500 @enderror"
-                        rows="2" placeholder="keyword1, keyword2"></textarea>
-                    @error('keywords')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
+                    <label class="text-xs text-slate-500">{{ __('Keywords') }}</label>
+                    <textarea wire:model.defer="keywords"
+                              rows="2"
+                              class="textarea w-full mt-1"
+                              placeholder="keyword1, keyword2"></textarea>
                 </div>
 
             </div>
         @endif
 
-        {{-- ================= SYSTEM TOOLS ================= --}}
+        {{-- ========== SYSTEM ========== --}}
         @if ($tab === 'system')
-            <div
-                class="mt-6 rounded-2xl border border-slate-200 dark:border-slate-800
-           bg-slate-50 dark:bg-slate-900/80 p-5 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                <p class="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    {{ __('System tools') }}
-                </p>
+                <button
+                    wire:click="storageLink"
+                    class="flex items-center gap-4 p-5 rounded-2xl
+                           bg-sky-500/10 hover:bg-sky-500/20 transition">
+                    <flux:icon.folder-plus class="w-6 h-6 text-sky-600"/>
+                    <div class="text-left">
+                        <p class="font-medium">{{ __('Create storage link') }}</p>
+                        <p class="text-xs text-slate-500">php artisan storage:link</p>
+                    </div>
+                </button>
 
-                <div class="flex flex-wrap gap-3">
+                <button
+                    wire:click="clearCache"
+                    class="flex items-center gap-4 p-5 rounded-2xl
+                           bg-amber-500/10 hover:bg-amber-500/20 transition">
+                    <flux:icon.arrow-path class="w-6 h-6 text-amber-600"/>
+                    <div class="text-left">
+                        <p class="font-medium">{{ __('Clear cache') }}</p>
+                        <p class="text-xs text-slate-500">cache · config · view</p>
+                    </div>
+                </button>
 
-                    {{-- Storage Link --}}
-                    <button wire:click="storageLink"
-                        class="px-4 py-2 rounded-xl text-sm font-medium
-                   bg-sky-600 text-white
-                   hover:bg-sky-700 transition">
-                        {{ __('Create storage link') }}
-                    </button>
-
-                    {{-- Clear Cache --}}
-                    <button wire:click="clearCache"
-                        class="px-4 py-2 rounded-xl text-sm font-medium
-                   bg-amber-600 text-white
-                   hover:bg-amber-700 transition">
-                        {{ __('Clear cache') }}
-                    </button>
-
-                </div>
             </div>
         @endif
+
     </div>
 
-    {{-- Save --}}
-    <div class="flex justify-end pt-4">
-        <button wire:click="save" wire:loading.attr="disabled" wire:target="save"
-            class="px-6 py-2 rounded-xl text-sm
-                   bg-accent text-white
-                   hover:opacity-90 transition
-                   disabled:opacity-50 disabled:cursor-not-allowed
-                   flex items-center gap-2">
+    {{-- ================= SAVE BAR ================= --}}
+    <div class="flex justify-end pt-2">
+        <button
+            wire:click="save"
+            wire:loading.attr="disabled"
+            class="inline-flex items-center gap-2 px-6 py-2 rounded-lg
+                   bg-accent text-white hover:opacity-90 transition
+                   disabled:opacity-50">
 
-            <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <circle cx="12" cy="12" r="10" stroke-width="4" class="opacity-25" />
-                <path d="M12 2a10 10 0 0110 10" stroke-width="4" class="opacity-75" />
-            </svg>
-
-            <span wire:loading.remove wire:target="save">
-                {{ __('Save settings') }}
-            </span>
-
-            <span wire:loading wire:target="save">
-                {{ __('Saving...') }}
-            </span>
+            <flux:icon.check class="w-4 h-4"/>
+            {{ __('Save settings') }}
         </button>
     </div>
 

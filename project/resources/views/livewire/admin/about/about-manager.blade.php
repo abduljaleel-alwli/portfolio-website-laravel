@@ -12,6 +12,10 @@ new class extends Component {
     public string $subtitle = '';
     public string $description = '';
 
+    public bool $showIconPicker = false;
+public ?int $iconPickerIndex = null;
+
+
     // Repeatable features
     public array $features = [];
 
@@ -43,6 +47,34 @@ new class extends Component {
         $this->features = array_values($this->features);
     }
 
+    public function openIconPicker(int $index): void
+{
+    $this->iconPickerIndex = $index;
+    $this->showIconPicker = true;
+}
+
+public function selectIcon(string $icon): void
+{
+    if ($this->iconPickerIndex === null) {
+        return;
+    }
+
+    $this->features[$this->iconPickerIndex]['icon_type'] = 'flux';
+    $this->features[$this->iconPickerIndex]['icon_value'] = $icon;
+
+    $this->showIconPicker = false;
+    $this->iconPickerIndex = null;
+}
+
+public function updatedFeatures($value, $key): void
+{
+    if (str_ends_with($key, '.icon_type')) {
+        $index = (int) explode('.', $key)[0];
+        $this->features[$index]['icon_value'] = '';
+    }
+}
+
+
     public function save(SettingsService $settings): void
     {
         $this->validate([
@@ -53,7 +85,7 @@ new class extends Component {
             'features' => ['array'],
             'features.*.title' => ['required', 'string', 'max:255'],
             'features.*.description' => ['required', 'string'],
-            'features.*.icon_type' => ['required', 'in:class,svg'],
+            'features.*.icon_type' => ['required', 'in:class,svg,flux'],
             'features.*.icon_value' => ['nullable', 'string'],
         ]);
 
@@ -82,63 +114,62 @@ new class extends Component {
 ?>
 
 <div class="space-y-6">
-    @include('partials.settings-heading', [
-        'title' => __('About us'),
-        'description' => __('Manage About Us page content'),
-    ])
 
     <div
-        class="rounded-2xl border border-slate-200 dark:border-slate-800
-           bg-white/90 dark:bg-slate-900/80
-           backdrop-blur
+    class="rounded-2xl border border-slate-200 dark:border-slate-800
+           bg-white dark:bg-slate-900/90
            p-6 space-y-6">
 
-        {{-- Title --}}
-        <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">
-                {{ __('Title') }}
-            </label>
-
-            <input type="text" wire:model.defer="title"
-                class="input w-full @error('title') ring-1 ring-red-500 @enderror"
-                placeholder="{{ __('About page title') }}" />
-
-            @error('title')
-                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-
-        {{-- Subtitle --}}
-        <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">
-                {{ __('Subtitle') }}
-                <span class="text-slate-400">({{ __('Optional') }})</span>
-            </label>
-
-            <input type="text" wire:model.defer="subtitle"
-                class="input w-full @error('subtitle') ring-1 ring-red-500 @enderror"
-                placeholder="{{ __('Short subtitle under the title') }}" />
-
-            @error('subtitle')
-                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-
-        {{-- Description --}}
-        <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">
-                {{ __('Description') }}
-            </label>
-
-            <textarea wire:model.defer="description" rows="5"
-                class="textarea w-full @error('description') ring-1 ring-red-500 @enderror"
-                placeholder="{{ __('Main description of the About page') }}"></textarea>
-
-            @error('description')
-                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
+    <div class="flex items-center gap-2">
+        <flux:icon name="information-circle" class="w-5 h-5 text-accent" />
+        <h3 class="text-base font-semibold text-slate-900 dark:text-white">
+            {{ __('About content') }}
+        </h3>
     </div>
+
+    {{-- Title --}}
+    <div>
+        <label class="block text-xs font-medium text-slate-500 mb-1">
+            {{ __('Title') }}
+        </label>
+
+        <input type="text" wire:model.defer="title"
+            class="input w-full @error('title') ring-1 ring-red-500 @enderror"
+            placeholder="{{ __('About page title') }}" />
+
+        @error('title')
+            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
+    {{-- Subtitle --}}
+    <div>
+        <label class="block text-xs font-medium text-slate-500 mb-1">
+            {{ __('Subtitle') }}
+            <span class="text-slate-400">({{ __('Optional') }})</span>
+        </label>
+
+        <input type="text" wire:model.defer="subtitle"
+            class="input w-full @error('subtitle') ring-1 ring-red-500 @enderror"
+            placeholder="{{ __('Short subtitle under the title') }}" />
+    </div>
+
+    {{-- Description --}}
+    <div>
+        <label class="block text-xs font-medium text-slate-500 mb-1">
+            {{ __('Description') }}
+        </label>
+
+        <textarea wire:model.defer="description" rows="5"
+            class="textarea w-full @error('description') ring-1 ring-red-500 @enderror"
+            placeholder="{{ __('Main description of the About page') }}"></textarea>
+
+        @error('description')
+            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+</div>
+
 
 
 
@@ -154,39 +185,28 @@ new class extends Component {
 
                 {{-- Header --}}
                 <div
-                    class="px-6 py-4 border-b border-slate-200 dark:border-slate-800
-               flex items-center justify-between">
+    class="px-6 py-4 border-b border-slate-200 dark:border-slate-800
+           flex items-center justify-between">
 
-                    <div class="flex items-center gap-2">
-                        {{-- Heroicon: sparkles --}}
-                        <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846
-                       a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813
-                       a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846
-                       a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813
-                       a4.5 4.5 0 00-3.09 3.09z" />
-                        </svg>
+    <div class="flex items-center gap-2">
+        <flux:icon name="sparkles" class="w-5 h-5 text-accent" />
+        <h3 class="text-base font-semibold text-slate-900 dark:text-white">
+            {{ __('Features') }}
+        </h3>
+    </div>
 
-                        <h3 class="text-base font-semibold text-slate-900 dark:text-white">
-                            {{ __('Features') }}
-                        </h3>
-                    </div>
-
-                    <button wire:click="addFeature"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm
-                   bg-accent text-white hover:opacity-90 transition">
-                        {{-- Heroicon: plus --}}
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        {{ __('Add feature') }}
-                    </button>
-                </div>
+    <button wire:click="addFeature"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm
+               bg-accent text-white hover:opacity-90 transition">
+        <flux:icon name="plus" class="w-4 h-4" />
+        {{ __('Add feature') }}
+    </button>
+</div>
 
 
 
-                <div class="p-6 space-y-4">
+
+        <div class="p-6 space-y-4">
                     @forelse ($features as $index => $feature)
                         @php
                             $featureHasError =
@@ -197,126 +217,98 @@ new class extends Component {
                         @endphp
 
                         <div
-                            class="rounded-xl border p-5 space-y-4 transition
+    class="rounded-xl border p-5 space-y-4 transition
     {{ $featureHasError
         ? 'border-red-300 bg-red-50 dark:bg-red-950/30 ring-1 ring-red-500'
-        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50' }}">
+        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900' }}">
 
-                            <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
-                                {{-- Heroicon: puzzle-piece --}}
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.75V5.25A2.25 2.25 0 0012 3
-                   a2.25 2.25 0 00-2.25 2.25v1.5H8.25
-                   A2.25 2.25 0 006 9v.75a2.25 2.25 0 002.25 2.25
-                   h1.5v1.5A2.25 2.25 0 0012 15
-                   a2.25 2.25 0 002.25-2.25v-1.5h1.5
-                   A2.25 2.25 0 0018 9.75V9
-                   a2.25 2.25 0 00-2.25-2.25h-1.5z" />
-                                </svg>
+    {{-- Feature header --}}
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+            <flux:icon name="puzzle-piece" class="w-4 h-4" />
+            {{ __('Feature') }} #{{ $index + 1 }}
+        </div>
 
-                                {{ __('Feature') }} #{{ $index + 1 }}
-                            </div>
+        <button wire:click="removeFeature({{ $index }})"
+            class="inline-flex items-center gap-1 text-xs text-red-500 hover:underline">
+            <flux:icon name="trash" class="w-3.5 h-3.5" />
+            {{ __('Remove') }}
+        </button>
+    </div>
 
-                            {{-- Title --}}
-                            <div>
-                                <label class="block text-xs text-slate-500 mb-1">
-                                    {{ __('Feature title') }}
-                                </label>
-                                <input type="text" wire:model.defer="features.{{ $index }}.title"
-                                    class="input w-full
-        @error('features.' . $index . '.title') ring-1 ring-red-500 @enderror" />
+    {{-- Title --}}
+    <div>
+        <label class="block text-xs text-slate-500 mb-1">
+            {{ __('Feature title') }}
+        </label>
+        <input type="text" wire:model.defer="features.{{ $index }}.title"
+            class="input w-full @error('features.' . $index . '.title') ring-1 ring-red-500 @enderror" />
+    </div>
 
-                                @error('features.' . $index . '.title')
-                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+    {{-- Description --}}
+    <div>
+        <label class="block text-xs text-slate-500 mb-1">
+            {{ __('Feature description') }}
+        </label>
+        <textarea wire:model.defer="features.{{ $index }}.description"
+            class="textarea w-full @error('features.' . $index . '.description') ring-1 ring-red-500 @enderror"
+            rows="3"></textarea>
+    </div>
 
-                            {{-- Description --}}
-                            <div>
-                                <label class="block text-xs text-slate-500 mb-1">
-                                    {{ __('Feature description') }}
-                                </label>
-                                <textarea wire:model.defer="features.{{ $index }}.description"
-                                    class="textarea w-full
-        @error('features.' . $index . '.description') ring-1 ring-red-500 @enderror"
-                                    rows="3"></textarea>
+    {{-- Icon --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-xs text-slate-500 mb-1">
+                {{ __('Icon type') }}
+            </label>
+<select wire:model.live="features.{{ $index }}.icon_type"
+        class="input w-full">
+                <option value="class">{{ __('Fontawesome') }}</option>
+                <option value="svg">{{ __('SVG') }}</option>
+                <option value="flux">{{ __('Flux') }}</option>
+            </select>
+        </div>
 
-                                @error('features.' . $index . '.description')
-                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                @enderror
+<div>
+    <label class="block text-xs text-slate-500 mb-1">
+        {{ __('Icon value') }}
+    </label>
 
-                            </div>
+    @if (($features[$index]['icon_type'] ?? null) === 'class')
+        <input
+            type="text"
+            wire:model.defer="features.{{ $index }}.icon_value"
+            class="input w-full"
+            placeholder="fa-solid fa-star" />
 
-                            {{-- Icon type --}}
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs text-slate-500 mb-1">
-                                        {{ __('Icon type') }}
-                                    </label>
-                                    <select wire:model.defer="features.{{ $index }}.icon_type"
-                                        class="input w-full @error('features.' . $index . '.icon_type') ring-1 ring-red-500 @enderror">
-                                        <option value="class">
-                                            {{ __('Icon class (Font Awesome)') }}
-                                        </option>
-                                        <option value="svg">
-                                            {{ __('SVG icon') }}
-                                        </option>
-                                    </select>
-                                    @error('features.' . $index . '.icon_type')
-                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
+    @elseif (($features[$index]['icon_type'] ?? null) === 'flux')
+<livewire:icon-picker
+    wire:model="features.{{ $index }}.icon_value"
+    :key="'icon-picker-'.$index"
+/>
 
-                                <div>
-                                    <label class="block text-xs text-slate-500 mb-1">
-                                        {{ __('Icon value') }}
-                                    </label>
 
-                                    @if ($features[$index]['icon_type'] === 'class')
-                                        <input type="text"
-                                            wire:model.defer="features.{{ $index }}.icon_value"
-                                            class="input w-full
-            @error('features.' . $index . '.icon_value') ring-1 ring-red-500 @enderror" />
-                                    @else
-                                        <textarea wire:model.defer="features.{{ $index }}.icon_value"
-                                            class="textarea w-full font-mono text-xs
-            @error('features.' . $index . '.icon_value') ring-1 ring-red-500 @enderror"
-                                            rows="3"></textarea>
-                                    @endif
+    @else
+        <textarea
+            wire:model.defer="features.{{ $index }}.icon_value"
+            class="textarea w-full font-mono text-xs"
+            rows="3"
+            placeholder="<svg>...</svg>"></textarea>
+    @endif
+</div>
 
-                                    @error('features.' . $index . '.icon_value')
-                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                    @enderror
+    </div>
+</div>
 
-                                </div>
-                            </div>
+@empty
+    <div class="text-sm text-slate-500 text-center py-6">
+        {{ __('No features added yet') }}
+    </div>
+@endforelse
 
-                            {{-- Remove --}}
-                            <div class="flex justify-end">
-                                <button wire:click="removeFeature({{ $index }})"
-                                    class="inline-flex items-center gap-1 text-xs text-red-500 hover:underline">
-                                    {{-- Heroicon: trash --}}
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21
-                   c.342.052.682.107 1.022.166M5.772 5.79
-                   L6.84 19.673a2.25 2.25 0 002.244 2.077h7.832
-                   a2.25 2.25 0 002.244-2.077L18.228 5.79" />
-                                    </svg>
-                                    {{ __('Remove feature') }}
-                                </button>
-                            </div>
-
-                        </div>
-                    @empty
-                        <div class="text-sm text-slate-500 text-center py-6">
-                            {{ __('No features added yet') }}
-                        </div>
-                    @endforelse
                 </div>
-            </div>
 
+            </div>
         </div>
 
         <div
