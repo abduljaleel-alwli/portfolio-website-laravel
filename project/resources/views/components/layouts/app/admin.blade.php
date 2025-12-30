@@ -5,7 +5,7 @@
     @include('partials.admin-head')
 </head>
 
-<body class="min-h-screen bg-white dark:bg-zinc-800">
+<body class="min-h-screen bg-white dark:bg-zinc-800" {{ app()->getLocale() === 'ar' ? 'dir=rtl' : '' }}>
     <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
 
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
@@ -42,13 +42,14 @@
 
                 <flux:navlist.item icon="bell" :href="route('admin.notifications')"
                     :current="request()->routeIs('admin.notifications')" wire:navigate>
+
                     <div class="relative flex items-center gap-2">
                         <span>{{ __('Notifications') }}</span>
 
-                        <x-notifications.notification-badge :count="auth()->user()->unreadNotifications()->count()" />
+                        <x-notifications.notification-badge
+                            :count="\Illuminate\Notifications\DatabaseNotification::whereNull('read_at')->count()" />
                     </div>
                 </flux:navlist.item>
-
 
                 <flux:navlist.item icon="envelope" :href="route('admin.contact-messages')"
                     :current="request()->routeIs('admin.contact-messages')" wire:navigate>
@@ -106,7 +107,7 @@
             </flux:navlist.item>
 
             <flux:navlist.item icon="chat-bubble-left-right"
-                href="https://api.whatsapp.com/send/?phone=967737140316&text=Hello%2C+I+need+help.&type=phone_number&app_absent=0"
+                href="https://api.whatsapp.com/send/?phone=000000000&text=Hello%2C+I+need+help.&type=phone_number&app_absent=0"
                 target="_blank">
                 {{ __('Dev Support') }}
             </flux:navlist.item>

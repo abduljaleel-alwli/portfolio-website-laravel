@@ -13,7 +13,7 @@
     @fluxScripts
 
     {{-- Footer Script --}}
-    {!! $settings['scripts.footer'] ?? ''  !!}
+    {!! $settings['scripts.footer'] ?? '' !!}
 </body>
 
 </html>

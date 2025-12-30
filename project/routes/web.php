@@ -7,9 +7,9 @@ use Livewire\Volt\Volt;
 
 // ---> Public Landing Page
 Volt::route('/', 'home')->name('home');
-Volt::route('/products', 'app.products.index')->name('products.index');
-Volt::route('/about', 'app.about.index')->name('about.index');
-Volt::route('/contact', 'app.contact.index')->name('contact.index');
+Volt::route('/products', 'app.products.index')->name('products');
+Volt::route('/about', 'app.about.index')->name('about');
+Volt::route('/contact', 'app.contact.index')->name('contact');
 
 // --> Analytics tracking endpoint
 Route::post('/analytics/track', function (Request $request) {

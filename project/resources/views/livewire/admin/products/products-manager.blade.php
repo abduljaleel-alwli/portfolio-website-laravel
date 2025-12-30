@@ -123,9 +123,9 @@ public function loadProducts(): void
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'category_id' => ['nullable', 'exists:categories,id'],
-            'main_image' => ['nullable', 'image', 'max:2048'],
+            'main_image' => ['nullable', 'image', 'max:10240'],
             'images' => ['nullable', 'array'],
-            'images.*' => ['nullable', 'image', 'max:2048'],
+            'images.*' => ['nullable', 'image', 'max:10240'],
             'is_active' => ['boolean'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:500'],
@@ -615,7 +615,12 @@ public function loadProducts(): void
         <div class="fixed inset-0 z-50">
 
             {{-- Overlay --}}
-            <div wire:click="closeModal" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            wire:click="closeModal"
+            wire:loading.remove
+            wire:target="save">
+        </div>
 
             {{-- Center Wrapper --}}
             <div class="relative h-full w-full flex items-start justify-center
@@ -623,13 +628,14 @@ public function loadProducts(): void
 
                 {{-- Modal Container --}}
                 <div
-                    class="w-full max-w-2xl
-                       rounded-2xl
-                       bg-white dark:bg-slate-900
-                       border border-slate-200 dark:border-slate-800
-                       shadow-2xl
-                       max-h-[90vh]
-                       flex flex-col overflow-hidden">
+    class="w-full max-w-2xl
+           rounded-2xl
+           bg-white dark:bg-slate-900
+           border border-slate-200 dark:border-slate-800
+           shadow-2xl
+           max-h-[90vh]
+           flex flex-col overflow-hidden
+           animate-in fade-in zoom-in duration-150">
 
                     {{-- Header (Sticky) --}}
                     <div
@@ -754,18 +760,52 @@ public function loadProducts(): void
                                     <input type="file" wire:model="images" multiple
                                         class="text-sm text-slate-500" />
 
+                                        @if ($editing && $editing->images)
+    <div class="space-y-2">
+        <p class="text-xs text-slate-500">
+            {{ __('Current images') }}
+        </p>
+
+        <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            @foreach ($editing->images as $img)
+                <div
+                    class="relative w-full h-24 rounded-xl overflow-hidden
+                           ring-1 ring-slate-200 dark:ring-slate-700">
+
+                    <img
+                        src="{{ asset('storage/' . $img) }}"
+                        class="w-full h-full object-cover
+                               hover:scale-110 transition-transform" />
+
+                    {{-- Overlay --}}
+                    <div class="absolute inset-0 bg-black/0 hover:bg-black/20 transition"></div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+@endif
+
                                     <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3">
                                         @if ($images)
-                                            @foreach ($images as $img)
-                                                <div
-                                                    class="w-full h-24 rounded-xl overflow-hidden
-                                                       ring-1 ring-slate-200 dark:ring-slate-700">
-                                                    <img src="{{ $img->temporaryUrl() }}"
-                                                        class="w-full h-full object-cover
-                                                           hover:scale-110 transition-transform" />
-                                                </div>
-                                            @endforeach
-                                        @endif
+    <div class="space-y-2">
+        <p class="text-xs text-slate-500">
+            {{ __('New images') }}
+        </p>
+
+        <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            @foreach ($images as $img)
+                <div
+                    class="w-full h-24 rounded-xl overflow-hidden
+                           ring-1 ring-accent/40">
+                    <img src="{{ $img->temporaryUrl() }}"
+                        class="w-full h-full object-cover
+                               hover:scale-110 transition-transform" />
+                </div>
+            @endforeach
+        </div>
+    </div>
+@endif
+
                                     </div>
 
                                     @error('images.*')
@@ -805,19 +845,51 @@ public function loadProducts(): void
                         </label>
 
                         <div class="flex gap-2">
-                            <button wire:click="closeModal"
-                                class="px-4 py-2 rounded-lg text-sm
-                                   bg-slate-200 dark:bg-slate-800
-                                   hover:opacity-80 transition">
-                                {{ __('Cancel') }}
-                            </button>
+<button
+    wire:click="closeModal"
+    wire:loading.attr="disabled"
+    wire:target="save"
+    class="px-4 py-2 rounded-lg text-sm
+           bg-slate-200 dark:bg-slate-800
+           hover:opacity-80 transition
+           disabled:opacity-50 disabled:cursor-not-allowed">
+    {{ __('Cancel') }}
+</button>
 
-                            <button wire:click="save"
-                                class="px-4 py-2 rounded-lg text-sm
-                                   bg-accent text-white
-                                   hover:opacity-90 transition">
-                                {{ __('Save') }}
-                            </button>
+
+<button
+    wire:click="save"
+    wire:loading.attr="disabled"
+    wire:target="save"
+    class="relative inline-flex items-center justify-center gap-2
+           px-5 py-2.5 rounded-lg text-sm font-medium
+           bg-accent text-white
+           transition
+           hover:opacity-90
+           disabled:opacity-60 disabled:cursor-not-allowed">
+
+    {{-- الحالة العادية --}}
+    <span wire:loading.remove wire:target="save">
+        {{ __('Save') }}
+    </span>
+
+    {{-- حالة التحميل --}}
+    <span wire:loading wire:target="save" class="flex items-center gap-2">
+        <svg class="w-4 h-4 animate-spin text-white"
+             xmlns="http://www.w3.org/2000/svg"
+             fill="none"
+             viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10"
+                    stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+            </path>
+        </svg>
+        {{ __('Saving...') }}
+    </span>
+</button>
+
                         </div>
                     </div>
 

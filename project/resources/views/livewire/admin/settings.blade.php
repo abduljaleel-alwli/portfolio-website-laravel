@@ -372,6 +372,7 @@ new class extends Component {
             </p>
         </div>
 
+        <hr class="hr">
         {{-- Footer Script --}}
         <div>
             <label class="text-xs text-slate-500">

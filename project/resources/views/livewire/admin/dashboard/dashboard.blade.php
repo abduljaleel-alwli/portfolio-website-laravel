@@ -105,11 +105,9 @@ new class extends Component {
         @role('super-admin')
         <x-dashboard.card title="Users" :value="$metrics['users']" icon="shield-check" color="violet"
             href="{{ route('admin.users') }}" />
-        @endrole
-
-
         <x-dashboard.card title="System Status" :value="$metrics['dashboard_health'] ? __('Active') : __('Idle')"
             icon="signal" color="{{ $metrics['dashboard_health'] ? 'emerald' : 'rose' }}" />
+        @endrole
 
         <x-dashboard.card title="Products" :value="$metrics['products']" icon="cube" color="amber"
             href="{{ route('admin.products') }}" />
@@ -184,16 +182,16 @@ new class extends Component {
                 @else
                     @foreach ($metrics['top_pages'] as $page)
                         <li class="flex items-center justify-between gap-3
-                               rounded-lg px-2 py-2
-                               hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                                               rounded-lg px-2 py-2
+                                               hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
 
                             <span class="truncate text-slate-700 dark:text-slate-300">
                                 {{ $page->page }}
                             </span>
 
                             <span class="min-w-[42px] text-center
-                                   px-2 py-0.5 rounded-md text-xs font-semibold
-                                   bg-slate-100 dark:bg-slate-800">
+                                                   px-2 py-0.5 rounded-md text-xs font-semibold
+                                                   bg-slate-100 dark:bg-slate-800">
                                 {{ $page->visits }}
                             </span>
                         </li>
@@ -246,10 +244,10 @@ new class extends Component {
                         @php $unread = is_null($notification->read_at); @endphp
 
                         <li class="flex items-start gap-3 rounded-lg px-2 py-2
-                               hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                                               hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
 
                             <span class="mt-1.5 w-2 h-2 rounded-full
-                                   {{ $unread ? 'bg-emerald-500' : 'bg-slate-300' }}">
+                                                   {{ $unread ? 'bg-emerald-500' : 'bg-slate-300' }}">
                             </span>
 
                             <div class="flex-1 min-w-0">
@@ -320,7 +318,6 @@ new class extends Component {
         </ul>
 
     </div>
-
 
 
     @push('scripts')

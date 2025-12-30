@@ -226,7 +226,7 @@
     "Keywords": "الكلمات المفتاحية",
     "Head scripts": "سكربتات الرأس",
     "This code will be injected inside <head>": "سيتم إدراج هذا الكود داخل وسم <head>",
-    "Footer scripts": "سكربتات التذييل",
+    "Footer scripts": "سكربتات Footer",
     "This code will be injected before </body>": "سيتم إدراج هذا الكود قبل وسم </body>",
     "Create storage link": "إنشاء رابط التخزين",
     "Clear cache": "مسح الكاش",
@@ -343,5 +343,6 @@
     "Enable 2FA": "تفعيل المصادقة الثنائية",
     "Back": "رجوع",
     "or, enter the code manually": "أو أدخل الرمز يدويًا",
-    "Manage your profile and account settings": "إدارة إعدادات ملفك الشخصي وحسابك"
+    "Manage your profile and account settings": "إدارة إعدادات ملفك الشخصي وحسابك",
+    "Load more": "تحميل المزيد"
 }

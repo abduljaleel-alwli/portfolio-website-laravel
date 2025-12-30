@@ -1,5 +1,5 @@
-document.addEventListener('click', function (e) {
-    const el = e.target.closest('[data-analytics]');
+document.addEventListener("click", function (e) {
+    const el = e.target.closest("[data-analytics]");
     if (!el) return;
 
     const payload = {
@@ -13,18 +13,18 @@ document.addEventListener('click', function (e) {
     // ✅ الطريقة المثالية للتتبع
     if (navigator.sendBeacon) {
         const blob = new Blob([JSON.stringify(payload)], {
-            type: 'application/json',
+            type: "application/json",
         });
-        navigator.sendBeacon('/analytics/track', blob);
+        navigator.sendBeacon("/analytics/track", blob);
     } else {
         // fallback
-        fetch('/analytics/track', {
-            method: 'POST',
+        fetch("/analytics/track", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document
                     .querySelector('meta[name="csrf-token"]')
-                    ?.getAttribute('content'),
+                    ?.getAttribute("content"),
             },
             body: JSON.stringify(payload),
             keepalive: true,
