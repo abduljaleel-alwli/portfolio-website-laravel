@@ -34,6 +34,20 @@
                     href="{{ route('home') }}">
 
                     <span class="logo-wrap">
+
+                        <span class="log-box">
+                            <x-app-logo-icon width="75" />
+                        </span>
+                    </span>
+
+                    {{ settings('site_name', 'اسم الموقع') }}
+                </a>
+
+                <a class="d-flex align-items-center gap-2 fw-bold text-light fs-3 opacity-0" style="pointer-events: none"
+                    href="{{ route('home') }}">
+
+                    <span class="logo-wrap">
+
                         <span class="log-box">
                             <x-app-logo-icon width="75" />
                         </span>

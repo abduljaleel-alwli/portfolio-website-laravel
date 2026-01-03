@@ -706,6 +706,61 @@ new class extends Component {
                             {{ $selected->message }}
                         </div>
                     </div>
+
+                    {{-- Attachment --}}
+                    @if ($selected->attachment_path)
+                        @php
+                            $fullPath = storage_path('app/' . $selected->attachment_path);
+
+                            $size = file_exists($fullPath) ? round(filesize($fullPath) / 1024, 2) : null;
+
+                            $extension = strtolower(pathinfo($selected->attachment_path, PATHINFO_EXTENSION));
+                            $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                        @endphp
+
+                        <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
+                            <p class="text-xs text-slate-500 mb-2">
+                                {{ __('Attachment') }}
+                            </p>
+
+                            <a href="{{ route('contact.attachments.download', $selected->id) }}" target="_blank"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
+                   bg-slate-100 dark:bg-slate-800
+                   text-slate-700 dark:text-slate-200
+                   hover:bg-slate-200 dark:hover:bg-slate-700
+                   transition text-sm">
+                                {{-- Heroicon: Paper Clip --}}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l9.192-9.193a3 3 0 114.243 4.243l-9.193 9.193a1.5 1.5 0 01-2.121-2.121l7.693-7.693" />
+                                </svg>
+
+                                {{ __('Download attachment') }}
+
+                                @if ($size)
+                                    <span class="text-xs text-slate-500">
+                                        ({{ $size }} KB)
+                                    </span>
+                                @endif
+                            </a>
+                            {{-- Image preview --}}
+                            @if ($isImage)
+                                <div class="mt-3">
+                                    <p class="text-xs text-slate-500 mb-2">
+                                        {{ __('Preview') }}
+                                    </p>
+
+                                    <img src="{{ route('contact.attachments.download', $selected->id) }}"
+                                        alt="Attachment preview"
+                                        class="max-w-full max-h-64 rounded-xl
+                           border border-slate-200 dark:border-slate-700
+                           shadow-sm" />
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                 </div>
             @else
                 <div class="p-10 text-center text-sm text-slate-500">

@@ -47,7 +47,7 @@
             rgba(7, 18, 37, 0.72)
         ),
         url("/assets/images/contact.png") center/cover no-repeat;
-        padding-top: 200px;
+    padding-top: 200px;
 }
 
 .contact-bg__overlay {
@@ -118,7 +118,7 @@
 }
 
 .af-field label {
-    display: block;
+    display: flex;
     margin-bottom: 6px;
     font-weight: 800;
     color: rgba(255, 255, 255, 0.88);
@@ -357,7 +357,6 @@
     font-weight: 400 !important;
 }
 
-
 /* ---------------- From Submit ---------------- */
 /* Erorrs */
 .af-error {
@@ -371,7 +370,7 @@
 }
 
 .af-btn[disabled] {
-    opacity: .6;
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
@@ -386,7 +385,7 @@
     color: #22c55e; /* أخضر أنيق */
     font-size: 14px;
     font-weight: 500;
-    animation: fadeIn .3s ease;
+    animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
@@ -399,7 +398,6 @@
         transform: translateY(0);
     }
 }
-
 
 /* ============================= */
 /* Map Half Screen Layout        */
@@ -423,7 +421,7 @@
     font-size: 1.8rem;
     font-weight: 700;
     color: #facc15;
-    margin-bottom: .75rem;
+    margin-bottom: 0.75rem;
 }
 
 .af-map-sub {
@@ -445,15 +443,8 @@
     position: relative;
     padding: 2px;
     border-radius: 24px;
-    background: linear-gradient(
-        135deg,
-        #1e3a8a,
-        #2563eb,
-        #facc15,
-        #f59e0b
-    );
-    box-shadow:
-        0 25px 70px rgba(0, 0, 0, 0.6);
+    background: linear-gradient(135deg, #1e3a8a, #2563eb, #facc15, #f59e0b);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
 }
 
 .af-map-inner {
@@ -466,6 +457,78 @@
     width: 100%;
     height: 420px;
     border: 0;
+}
+
+/* =========================
+   Submit + Upload Inline
+========================= */
+
+.af-submit-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+}
+
+
+/* Upload button */
+.af-upload-inline {
+    position: relative;
+}
+
+.af-file-input {
+    display: none;
+}
+
+.af-upload {
+    width: 61%;
+}
+
+.af-upload-box {
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-weight: 800;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px dashed rgba(255, 255, 255, 0.35);
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.af-upload-box i {
+    color: var(--yellow);
+}
+
+.af-upload-box:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: var(--yellow);
+    transform: translateY(-1px);
+}
+
+/* File name */
+.af-file-name {
+    margin-top: 6px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .af-submit-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .af-upload-box,
+    .af-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* ---------- Responsive ---------- */

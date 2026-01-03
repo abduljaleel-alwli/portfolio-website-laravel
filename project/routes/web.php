@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
+use Illuminate\Support\Facades\Storage;
+
 
 // ---> Public Landing Page
 Volt::route('/', 'app.home.index')->name('home');
@@ -21,8 +23,30 @@ Route::post('/analytics/track', function (Request $request) {
 
     return response()->noContent();
 })
-->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
-->name('analytics.track');
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->name('analytics.track');
+
+// --> Download link for the attached file via contactUs
+Route::get(
+    '/contact-messages/{contactMessage}/attachment',
+    function (\App\Models\ContactMessage $contactMessage) {
+
+        abort_unless($contactMessage->attachment_path, 404);
+
+        $disk = Storage::disk('private');
+
+        abort_unless(
+            $disk->exists($contactMessage->attachment_path),
+            404
+        );
+
+        return $disk->download(
+            $contactMessage->attachment_path,
+            'contact-attachment-' . $contactMessage->id . '.' .
+            pathinfo($contactMessage->attachment_path, PATHINFO_EXTENSION)
+        );
+    }
+)->name('contact.attachments.download');
 
 
 // ---> Super-Admin & Admin

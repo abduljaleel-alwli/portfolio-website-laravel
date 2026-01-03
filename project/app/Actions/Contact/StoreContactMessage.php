@@ -3,8 +3,6 @@
 namespace App\Actions\Contact;
 
 use App\Models\ContactMessage;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Http\Request;
 
 class StoreContactMessage
 {
@@ -15,11 +13,12 @@ class StoreContactMessage
     {
         // Public action – no auth required
         return ContactMessage::create([
-            'name'       => $data['name'],
-            'email'      => $data['email'],
-            'message'    => $data['message'],
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'message' => $data['message'],
+            'attachment_path' => $data['attachment_path'] ?? null,
             'ip_address' => $ipAddress,
-            'phone'      => $data['phone'],
         ]);
     }
 }

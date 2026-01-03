@@ -357,5 +357,13 @@
     "User deleted: :email": "User deleted: :email",
     "Working time": "Working time",
     "Saturday - Thursday: 9:00 - 18:00": "Saturday - Thursday: 9:00 - 18:00",
-    "A new message was received from :name": "A new message was received from :name"
+    "A new message was received from :name": "A new message was received from :name",
+    "Sending...": "Sending...",
+    "Attachment (optional)": "Attachment (optional)",
+    "Upload a file": "Upload a file",
+    "PDF, Images, or Documents": "PDF, Images, or Documents",
+    "Choose file": "Choose file",
+    "Uploading file...": "Uploading file...",
+    "Attachment": "Attachment",
+    "Download attachment": "Download attachment"
 }

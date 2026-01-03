@@ -12,8 +12,9 @@ class ContactMessageMail extends Mailable
     use Queueable, SerializesModels;
 
     public function __construct(
-        public ContactMessage $contact
-    ) {}
+        public ContactMessage $contactMessage
+    ) {
+    }
 
     public function build(): self
     {
@@ -22,7 +23,12 @@ class ContactMessageMail extends Mailable
                 settings('contact.email_subject', __('New contact message'))
             )
             ->view('emails.contact-message', [
-                'contact' => $this->contact,
-            ]);
+                'contact' => $this->contactMessage,
+            ])->with([
+                    'messageData' => $this->contactMessage,
+                    'downloadUrl' => $this->contactMessage->attachment_path
+                        ? route('contact.attachments.download', $this->contactMessage->id)
+                        : null,
+                ]);
     }
 }

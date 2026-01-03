@@ -115,7 +115,7 @@ body {
 .site-navbar {
     width: 100%;
     padding: 10px 0 !important;
-
+    overflow: hidden;
     background: radial-gradient(
             900px 240px at 70% 0%,
             rgba(13, 110, 253, 0.25),
@@ -134,10 +134,6 @@ body {
     box-shadow: var(--shadow);
 }
 
-.site-navbar .navbar-brand {
-    color: var(--text) !important;
-    letter-spacing: 0.2px;
-}
 .site-navbar .navbar-brand img {
     /* filter: drop-shadow(0 8px 18px rgba(13, 110, 253, 0.25)); */
     filter: drop-shadow(0 8px 19px rgb(255 236 26));
@@ -219,65 +215,6 @@ body {
     filter: invert(1) brightness(1.2);
 }
 
-/* @media (min-width: 991.98px) {
-    .navbar-brand {
-        position: relative;
-        padding: 10px 0;
-        transition: padding 0.4s ease;
-    }
-
-    .logo-wrap {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        width: 43px;
-        height: 43px;
-        transition: width 0.6s ease;
-    }
-
-    .log-box {
-        position: relative;
-        width: 43px;
-        height: max-content;
-
-        transform-origin: right center;
-        transform: translateX(48px) scale(2.2);
-
-        overflow: hidden;
-
-        filter: drop-shadow(0 8px 18px rgba(13, 110, 253, 0.15));
-        transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-            filter 0.4s ease;
-    }
-
-    .log-box img {
-        transform: scale(1);
-        transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    header.is-hero .navbar-brand {
-        padding: 29px 0;
-    }
-
-    header.is-hero .logo-wrap {
-        width: 60px; 
-    }
-
-    header.is-hero .log-box {
-        position: absolute;
-        right: 0;
-        top: 0;
-
-        transform: translate(125px, 83px) scale(4.9);
-        transform: translate(-48px, 168px) scale(4);
-        filter: drop-shadow(0 30px 70px rgba(13, 110, 253, 0.35));
-    }
-
-    header.is-hero .log-box img {
-        transform: translateY(-7px) scale(1.2);
-    }
-} */
-
 /* ✅ موبايل: قائمة منسدلة بشكل زجاجي + الأزرار عرض كامل */
 @media (max-width: 991.98px) {
     .site-navbar .navbar-collapse {
@@ -297,6 +234,37 @@ body {
     .site-navbar .nav-item {
         text-align: center;
     }
+}
+/* ===============================
+   White Plate Under Logo ONLY
+================================ */
+
+.site-navbar .navbar-brand {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+
+    background: #ffffff; /* ✅ أبيض فقط هنا */
+    border-radius: 0 0 0 42px; /* انحناء مثل الصورة */
+
+    color: #071225 !important; /* لون النص داخل الأبيض */
+    z-index: 2;
+
+    color: var(--background-color) !important;
+    letter-spacing: 0.2px;
+    /* box-shadow: -8px 0 18px rgba(255, 255, 255, 0.35); */
+
+    font-size: 25px !important;
+}
+
+/* إزالة أي تأثيرات على الشعار */
+.site-navbar .navbar-brand img,
+.site-navbar .navbar-brand svg {
+    filter: none !important;
 }
 
 /* =========================================================
@@ -320,7 +288,7 @@ body {
         ),
         linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
     background-size: 55px 55px;
-    text-align: center  ;
+    text-align: center;
 }
 
 .footer-title {
@@ -426,13 +394,13 @@ body {
                 rgba(13, 110, 253, 0.72),
                 rgba(0, 0, 0, 0.25) 45%,
                 rgba(246, 193, 14, 0.4)
-            )   
+            )
             center center / cover fixed,
         url("/assets/images/bg-3.png") !important;
 }
 
 @media (max-width: 576px) {
-    .home-main .footer-section{
+    .home-main .footer-section {
         margin: 0;
     }
 }

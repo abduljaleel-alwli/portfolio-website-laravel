@@ -357,5 +357,13 @@
     "User deleted: :email": "تم حذف المستخدم: :email",
     "Working time": "ساعات العمل",
     "Saturday - Thursday: 9:00 - 18:00": "السبت - الخميس: 9:00 - 18:00",
-    "A new message was received from :name": "تم استلام رسالة جديدة من :name"
+    "A new message was received from :name": "تم استلام رسالة جديدة من :name",
+    "Sending...": "جار الأرسال...",
+    "Attachment (optional)": "مرفق (اختياري)",
+    "Upload a file": "رفع ملف",
+    "PDF, Images, or Documents": "PDF، صور، أو مستندات",
+    "Choose file": "اختر ملف",
+    "Uploading file...": "جاري رفع الملف...",
+    "Attachment": "المرفق",
+    "Download attachment": "تحميل المرفق"
 }
