@@ -344,5 +344,18 @@
     "Back": "Back",
     "or, enter the code manually": "or, enter the code manually",
     "Manage your profile and account settings": "Manage your profile and account settings",
-    "Load more": "Load more"
+    "Load more": "Load more",
+    "Visitors": "Visitors",
+    "Today Visits": "Today Visits",
+    "Contacts": "Contacts",
+    "Today Contacts": "Today Contacts",
+    "System Status": "System Status",
+    "WhatsApp Clicks": "WhatsApp Clicks",
+    "Social Clicks": "Social Clicks",
+    "Conversion Rate": "Conversion Rate",
+    "A new user was created: :email": "A new user was created: :email",
+    "User deleted: :email": "User deleted: :email",
+    "Working time": "Working time",
+    "Saturday - Thursday: 9:00 - 18:00": "Saturday - Thursday: 9:00 - 18:00",
+    "A new message was received from :name": "A new message was received from :name"
 }

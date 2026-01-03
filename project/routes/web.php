@@ -6,10 +6,11 @@ use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
 // ---> Public Landing Page
-Volt::route('/', 'home')->name('home');
+Volt::route('/', 'app.home.index')->name('home');
 Volt::route('/products', 'app.products.index')->name('products');
 Volt::route('/about', 'app.about.index')->name('about');
 Volt::route('/contact', 'app.contact.index')->name('contact');
+Volt::route('/clients', 'app.clients.index')->name('clients');
 
 // --> Analytics tracking endpoint
 Route::post('/analytics/track', function (Request $request) {

@@ -14,48 +14,63 @@
     <link rel="icon" href="{{ asset('storage/' . $settings['branding.favicon']) }}">
 @endif
 
-<style>
-    :root {
-        --color-secondary:
-            {{ $settings['colors.secondary'] ?? '#0ea5e9' }};
-        --color-accent:
-            {{ $settings['colors.accent'] ?? '#22c55e' }};
-        --color-background:
-            {{ $settings['colors.background'] ?? '#0b1220' }};
-    }
+<!-- Bootstrap RTL -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+{{-- <link href="assets/css/bootstrap.rtl.min.css" rel="stylesheet"> --}}
 
-    .bg-accent {
-        background-color: var(--color-accent);
-    }
-
-    .bg-background {
-        background-color: var(--color-background);
-    }
-
-    .bg-secondary {
-        background-color: var(--color-secondary);
-    }
-
-    .text-accent {
-        color: var(--color-accent);
-    }
-
-    .text-background {
-        color: var(--color-background);
-    }
-
-    .text-secondary {
-        color: var(--color-secondary);
-    }
-</style>
-
-
-<link rel="preconnect" href="https://fonts.bunny.net">
+<!-- Font -->
 <link href="https://fonts.bunny.net/css?family=Tajawal:400,500,600" rel="stylesheet" />
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-{{-- Head Script --}}
-@once
-    {!! $settings['scripts.head'] ?? '' !!}
-@endonce
+@if (request()->is('/'))
+    @include('partials.home.head')
+@elseif (request()->is('about'))
+    @include('partials.about.head')
+@elseif (request()->is('products'))
+    @include('partials.products.head')
+@elseif (request()->is('contact'))
+    @include('partials.contact.head')
+@elseif (request()->is('clients'))
+    @include('partials.clients.head')
+@endif
+
+<link data-page-style rel="stylesheet" href="/assets/css/mousecursor.css">
+
+<style>
+    :root {
+        --secondary-color:
+            {{ $settings['colors.secondary'] ?? '#0d6efdf2' }};
+        --accent-color:
+            {{ $settings['colors.accent'] ?? '#FED403' }};
+        --background-color:
+            {{ $settings['colors.background'] ?? '#0b1220' }};
+
+        /* Reset App Colors */
+        --yellow: var(--accent-color);
+        --gh-yellow: var(--accent-color);
+        --af-yellow: var(--accent-color);
+
+        /* المفروض يكون اللون --accent-color ولكن بدرجة اعمق */
+        /* --yellow2: var(--accent-color); */
+        /* --yellow2: color-mix(in srgb, var(--secondary-color) 80%, transparent); */
+        --yellow2: color-mix(in srgb,
+                var(--accent-color) 31%,
+                color-mix(in srgb, var(--secondary-color) 85%, transparent));
+
+        --secondary-color-2: #f5f5f5;
+
+        --blue: var(--secondary-color);
+        --af-blue: var(--secondary-color);
+    }
+
+    @font-face {
+        font-family: "Almarai-Regular";
+        src: url("/assets/fonts/Almarai-Regular.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+    }
+</style>

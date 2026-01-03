@@ -1,3 +1,44 @@
+(function loadHeadScript() {
+    if (!window.__HEAD_SCRIPT__) return;
+    if (window.__HEAD_SCRIPT_LOADED__) return;
+
+    window.__HEAD_SCRIPT_LOADED__ = true;
+
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.text = window.__HEAD_SCRIPT__;
+
+    document.head.appendChild(script);
+})();
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const bootstrapScript = document.createElement("script");
+    bootstrapScript.src =
+        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js";
+    document.body.appendChild(bootstrapScript);
+
+    const ScrollTrigger = document.createElement("script");
+    ScrollTrigger.src = "assets/js/ScrollTrigger.min.js";
+    document.body.appendChild(ScrollTrigger);
+
+    // ---> Add Footer Script
+    if (!window.__FOOTER_SCRIPT__) return;
+
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.text = window.__FOOTER_SCRIPT__;
+
+    document.body.appendChild(script);
+});
+
+
+document.addEventListener("livewire:navigating", () => {
+    document
+        .querySelectorAll("link[data-page-style]")
+        .forEach((el) => el.remove());
+});
+
 document.addEventListener("click", function (e) {
     const el = e.target.closest("[data-analytics]");
     if (!el) return;

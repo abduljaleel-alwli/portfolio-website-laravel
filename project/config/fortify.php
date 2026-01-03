@@ -86,7 +86,7 @@ return [
     |
     */
 
-    'prefix' => '',
+    'prefix' => 'aflak-admin',
 
     'domain' => null,
 

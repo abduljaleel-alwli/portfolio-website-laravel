@@ -23,6 +23,34 @@ class DashboardMetrics
     }
 
     /* =========================
+   DATE HELPERS (SPARKLINES)
+========================= */
+
+    protected function dateKeysLastDays(int $days): array
+    {
+        // مثال: ["2026-01-03", "2026-01-02", ...] لكن نرجعها تصاعديًا
+        return collect(range($days - 1, 0))
+            ->map(fn($i) => now()->subDays($i)->toDateString())
+            ->values()
+            ->all();
+    }
+
+    protected function fillDailySeries(array $dateKeys, $rows): array
+    {
+        // $rows collection فيها: date, total
+        $map = collect($rows)->mapWithKeys(function ($row) {
+            $date = is_array($row) ? ($row['date'] ?? null) : ($row->date ?? null);
+            $total = is_array($row) ? ($row['total'] ?? 0) : ($row->total ?? 0);
+            return [$date => (int) $total];
+        });
+
+        return collect($dateKeys)
+            ->map(fn($d) => (int) ($map->get($d, 0)))
+            ->all();
+    }
+
+
+    /* =========================
        BASIC COUNTS
     ========================= */
 
@@ -74,67 +102,96 @@ class DashboardMetrics
 
     public function visitsSparkline(): array
     {
-        return $this->sparklineFromCollection(
-            $this->dailyVisits(7)
+        return Cache::remember(
+            $this->cacheKey('visits_sparkline_7'),
+            now()->addMinutes(5),
+            function () {
+                $keys = $this->dateKeysLastDays(7);
+
+                $rows = DB::table('analytics_events')
+                    ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+                    ->where('event', 'page_view')
+                    ->where('created_at', '>=', now()->subDays(7)->startOfDay())
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get();
+
+                return $this->fillDailySeries($keys, $rows);
+            }
         );
     }
 
-
-    public function visitsTrend(): int
+        public function visitsTrend(): int
     {
-        $data = $this->dailyVisits(2);
-
-        if ($data->count() < 2) {
-            return 0;
-        }
-
-        $yesterday = $data[0]->total;
-        $today = $data[1]->total;
+        $today = $this->todayVisits();
+        $yesterday = $this->yesterdayVisits();
 
         if ($yesterday === 0) {
-            return 100;
+            return $today > 0 ? 100 : 0;
         }
 
         return (int) round((($today - $yesterday) / $yesterday) * 100);
     }
 
 
+
     public function contactsSparkline(): array
     {
-        return DB::table('analytics_events')
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
-            ->where('event', 'contact_submitted')
-            ->where('created_at', '>=', now()->subDays(7))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('total')
-            ->map(fn($v) => (int) $v)
-            ->toArray();
+        return Cache::remember(
+            $this->cacheKey('contacts_sparkline_7'),
+            now()->addMinutes(5),
+            function () {
+                $keys = $this->dateKeysLastDays(7);
+
+                $rows = DB::table('analytics_events')
+                    ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+                    ->where('event', 'contact_submitted')
+                    ->where('created_at', '>=', now()->subDays(7)->startOfDay())
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get();
+
+                return $this->fillDailySeries($keys, $rows);
+            }
+        );
     }
 
 
     public function conversionTrend(): int
     {
+        $startThisWeek = now()->subWeek();
+        $startLastWeek = now()->subWeeks(2);
+        $endLastWeek = now()->subWeek();
+
         $thisWeekVisits = DB::table('analytics_events')
             ->where('event', 'page_view')
-            ->where('created_at', '>=', now()->subWeek())
+            ->where('created_at', '>=', $startThisWeek)
+            ->count();
+
+        $thisWeekContacts = DB::table('analytics_events')
+            ->where('event', 'contact_submitted')
+            ->where('created_at', '>=', $startThisWeek)
             ->count();
 
         $lastWeekVisits = DB::table('analytics_events')
             ->where('event', 'page_view')
-            ->whereBetween('created_at', [
-                now()->subWeeks(2),
-                now()->subWeek()
-            ])
+            ->whereBetween('created_at', [$startLastWeek, $endLastWeek])
             ->count();
 
-        if ($lastWeekVisits === 0) {
-            return 0;
+        $lastWeekContacts = DB::table('analytics_events')
+            ->where('event', 'contact_submitted')
+            ->whereBetween('created_at', [$startLastWeek, $endLastWeek])
+            ->count();
+
+        $thisRate = $thisWeekVisits > 0 ? ($thisWeekContacts / $thisWeekVisits) * 100 : 0;
+        $lastRate = $lastWeekVisits > 0 ? ($lastWeekContacts / $lastWeekVisits) * 100 : 0;
+
+        if ($lastRate == 0.0) {
+            // لو الأسبوع الماضي 0%، والأسبوع الحالي صار فيه أي تحويل -> اعتبرها +100 (اختيار UX)
+            return $thisRate > 0 ? 100 : 0;
         }
 
-        return (int) round(
-            (($thisWeekVisits - $lastWeekVisits) / $lastWeekVisits) * 100
-        );
+        return (int) round((($thisRate - $lastRate) / $lastRate) * 100);
     }
 
 
@@ -189,56 +246,67 @@ class DashboardMetrics
        Visitors → Contact
     ========================= */
 
-    public function conversionRate(): float
+public function conversionRate(): float
+{
+    return Cache::remember(
+        $this->cacheKey('conversion_rate_this_week'),
+        now()->addMinutes(5),
+        function () {
+            $startOfWeek = now()->subWeek();
+
+            $visits = DB::table('analytics_events')
+                ->where('event', 'page_view')
+                ->where('created_at', '>=', $startOfWeek)
+                ->count();
+
+            $contacts = DB::table('analytics_events')
+                ->where('event', 'contact_submitted')
+                ->where('created_at', '>=', $startOfWeek)
+                ->count();
+
+            return $visits === 0
+                ? 0
+                : round(($contacts / $visits) * 100, 2);
+        }
+    );
+}
+
+
+    public function funnel(): array
     {
         return Cache::remember(
-            $this->cacheKey('conversion_rate'),
+            $this->cacheKey('funnel'),
             now()->addMinutes(5),
-            function () {
-                $visits = $this->totalVisits();
-                $contacts = $this->totalContactMessages();
-
-                return $visits === 0
-                    ? 0
-                    : round(($contacts / $visits) * 100, 2);
-            }
+            fn() => [
+                'visits' => $this->totalVisits(),
+                'contacts' => $this->totalContactMessages(),
+                'whatsapp_clicks' => $this->whatsappClicks(),
+            ]
         );
     }
 
-    public function funnel(): array
-{
-    return Cache::remember(
-        $this->cacheKey('funnel'),
-        now()->addMinutes(5),
-        fn() => [
-            'visits' => $this->totalVisits(),
-            'contacts' => $this->totalContactMessages(),
-            'whatsapp_clicks' => $this->whatsappClicks(),
-        ]
-    );
-}
+    public function topSources(int $limit = 5)
+    {
+        return Cache::remember(
+            $this->cacheKey("top_sources_{$limit}"),
+            now()->addMinutes(10),
+            fn() => DB::table('analytics_events')
+                ->selectRaw('COALESCE(NULLIF(source, ""), "unknown") as source, COUNT(*) as total')
+                ->where('event', 'contact_submitted')
+                ->groupBy('source')
+                ->orderByDesc('total')
+                ->limit($limit)
+                ->get()
+        );
+    }
 
-public function topSources(int $limit = 5)
-{
-    return Cache::remember(
-        $this->cacheKey("top_sources_{$limit}"),
-        now()->addMinutes(10),
-        fn() => DB::table('analytics_events')
-            ->select('source', DB::raw('COUNT(*) as total'))
-            ->where('event', 'contact_submitted')
-            ->groupBy('source')
-            ->orderByDesc('total')
-            ->limit($limit)
-            ->get()
-    );
-}
 
-public function isDashboardHealthy(): bool
-{
-    return $this->todayVisits() > 0 || $this->todayContacts() > 0;
-}
+    public function isDashboardHealthy(): bool
+    {
+        return $this->todayVisits() > 0 || $this->todayContacts() > 0;
+    }
 
-// public function lastAdminLogin()
+    // public function lastAdminLogin()
 // {
 //     return Cache::remember(
 //         $this->cacheKey('last_admin_login'),
@@ -270,43 +338,43 @@ public function isDashboardHealthy(): bool
     }
 
     public function todayVisits(): int
-{
-    return Cache::remember(
-        $this->cacheKey('visits_today'),
-        now()->addMinutes(2),
-        fn() => DB::table('analytics_events')
-            ->where('event', 'page_view')
-            ->whereDate('created_at', today())
-            ->count()
-    );
-}
+    {
+        return Cache::remember(
+            $this->cacheKey('visits_today'),
+            now()->addMinutes(2),
+            fn() => DB::table('analytics_events')
+                ->where('event', 'page_view')
+                ->whereDate('created_at', today())
+                ->count()
+        );
+    }
 
-public function yesterdayVisits(): int
-{
-    return Cache::remember(
-        $this->cacheKey('visits_yesterday'),
-        now()->addMinutes(2),
-        fn() => DB::table('analytics_events')
-            ->where('event', 'page_view')
-            ->whereDate('created_at', today()->subDay())
-            ->count()
-    );
-}
+    public function yesterdayVisits(): int
+    {
+        return Cache::remember(
+            $this->cacheKey('visits_yesterday'),
+            now()->addMinutes(2),
+            fn() => DB::table('analytics_events')
+                ->where('event', 'page_view')
+                ->whereDate('created_at', today()->subDay())
+                ->count()
+        );
+    }
 
 
-public function todayContacts(): int
-{
-    return Cache::remember(
-        $this->cacheKey('contacts_today'),
-        now()->addMinutes(2),
-        fn() => DB::table('analytics_events')
-            ->where('event', 'contact_submitted')
-            ->whereDate('created_at', today())
-            ->count()
-    );
-}
+    public function todayContacts(): int
+    {
+        return Cache::remember(
+            $this->cacheKey('contacts_today'),
+            now()->addMinutes(2),
+            fn() => DB::table('analytics_events')
+                ->where('event', 'contact_submitted')
+                ->whereDate('created_at', today())
+                ->count()
+        );
+    }
 
-// public function singlePageVisits(): int
+    // public function singlePageVisits(): int
 // {
 //     return Cache::remember(
 //         $this->cacheKey('single_page_visits'),
@@ -377,43 +445,43 @@ public function todayContacts(): int
             $this->cacheKey('all'),
             now()->addMinutes(3),
             fn() => [
-            // Core
-            'users' => $this->totalUsers(),
-            'products' => $this->totalProducts(),
-            'visits' => $this->totalVisits(),
-            'contacts' => $this->totalContactMessages(),
+                // Core
+                'users' => $this->totalUsers(),
+                'products' => $this->totalProducts(),
+                'visits' => $this->totalVisits(),
+                'contacts' => $this->totalContactMessages(),
 
-            // Today / Trends
-            'today_visits' => $this->todayVisits(),
-            'yesterday_visits' => $this->yesterdayVisits(),
-            'today_contacts' => $this->todayContacts(),
-            'visits_trend' => $this->visitsTrend(),
-            'conversion_trend' => $this->conversionTrend(),
+                // Today / Trends
+                'today_visits' => $this->todayVisits(),
+                'yesterday_visits' => $this->yesterdayVisits(),
+                'today_contacts' => $this->todayContacts(),
+                'visits_trend' => $this->visitsTrend(),
+                'conversion_trend' => $this->conversionTrend(),
 
-            // Engagement
-            // 'single_page_visits' => $this->singlePageVisits(),
-            'conversion_rate' => $this->conversionRate(),
-            'funnel' => $this->funnel(),
+                // Engagement
+                // 'single_page_visits' => $this->singlePageVisits(),
+                'conversion_rate' => $this->conversionRate(),
+                'funnel' => $this->funnel(),
 
-            // Clicks
-            'whatsapp_clicks' => $this->whatsappClicks(),
-            'social_clicks' => $this->socialClicks(),
+                // Clicks
+                'whatsapp_clicks' => $this->whatsappClicks(),
+                'social_clicks' => $this->socialClicks(),
 
-            // Sources / Pages
-            'top_pages' => $this->topPages(),
-            'top_sources' => $this->topSources(),
+                // Sources / Pages
+                'top_pages' => $this->topPages(),
+                'top_sources' => $this->topSources(),
 
-            // Charts
-            'daily_visits' => $this->dailyVisits(),
-            'monthly_visits' => $this->monthlyVisits(),
-            'visits_sparkline' => $this->visitsSparkline(),
-            'contacts_sparkline' => $this->contactsSparkline(),
+                // Charts
+                'daily_visits' => $this->dailyVisits(),
+                'monthly_visits' => $this->monthlyVisits(),
+                'visits_sparkline' => $this->visitsSparkline(),
+                'contacts_sparkline' => $this->contactsSparkline(),
 
-            // System
-            'activities' => $this->latestActivities(),
-            'notifications' => $this->latestNotifications(),
-            'dashboard_health' => $this->isDashboardHealthy(),
-            // 'last_admin_login' => $this->lastAdminLogin(),
+                // System
+                'activities' => $this->latestActivities(),
+                'notifications' => $this->latestNotifications(),
+                'dashboard_health' => $this->isDashboardHealthy(),
+                // 'last_admin_login' => $this->lastAdminLogin(),
             ]
         );
     }

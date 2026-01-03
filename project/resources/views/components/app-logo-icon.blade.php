@@ -2,7 +2,7 @@
     <img
         src="{{ asset('storage/' . $settings['branding.logo']) }}"
         alt="{{ __('Site logo') }}"
-        class="h-8"
+        {{ $attributes->merge(['class' => 'h-8']) }}
     >
 @else
     <span class="font-semibold">

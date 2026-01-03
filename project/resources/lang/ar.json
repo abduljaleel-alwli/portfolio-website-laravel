@@ -344,5 +344,18 @@
     "Back": "رجوع",
     "or, enter the code manually": "أو أدخل الرمز يدويًا",
     "Manage your profile and account settings": "إدارة إعدادات ملفك الشخصي وحسابك",
-    "Load more": "تحميل المزيد"
+    "Load more": "تحميل المزيد",
+    "Visitors": "الزوار",
+    "Today Visits": "زيارات اليوم",
+    "Contacts": "الرسائل",
+    "Today Contacts": "رسائل اليوم",
+    "System Status": "حالة النظام",
+    "WhatsApp Clicks": "نقرات واتساب",
+    "Social Clicks": "نقرات التواصل الاجتماعي",
+    "Conversion Rate": "معدل التحويل",
+    "A new user was created: :email": "تم إنشاء مستخدم جديد: :email",
+    "User deleted: :email": "تم حذف المستخدم: :email",
+    "Working time": "ساعات العمل",
+    "Saturday - Thursday: 9:00 - 18:00": "السبت - الخميس: 9:00 - 18:00",
+    "A new message was received from :name": "تم استلام رسالة جديدة من :name"
 }

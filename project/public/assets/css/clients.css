@@ -1,0 +1,384 @@
+:root {
+    --af-blue: #0d6efd;
+    --af-blue2: #0b3a86;
+    --af-yellow: #ffc107;
+    --af-ink: #071225;
+
+    --t: #eaf2ff;
+    --mut: rgba(234, 242, 255, 0.78);
+    --mut2: rgba(234, 242, 255, 0.6);
+
+    --glass: rgba(255, 255, 255, 0.06);
+    --stroke: rgba(255, 255, 255, 0.12);
+    --shadow: 0 22px 70px rgba(0, 0, 0, 0.55);
+
+    --blue: #0d6efd;
+    --blue2: #0a4cc8;
+    --yellow: #f6c10e;
+    --yellow2: #ffda4a;
+    --ink: #071225;
+    --muted: #97a8c5;
+}
+
+body {
+    background: #050b17;
+    color: #fff;
+}
+
+/* ===== Section Background (مثل الصورة) ===== */
+.aflak-testimonials {
+    position: relative;
+    padding: 80px 0;
+    overflow: hidden;
+    isolation: isolate;
+    background: radial-gradient(
+            1200px 520px at 50% 0%,
+            rgba(255, 193, 7, 0.1),
+            transparent 60%
+        ),
+        radial-gradient(
+            1200px 520px at 25% 35%,
+            rgba(13, 110, 253, 0.18),
+            transparent 65%
+        ),
+        radial-gradient(
+            900px 420px at 90% 10%,
+            rgba(255, 193, 7, 0.14),
+            transparent 60%
+        ),
+        linear-gradient(180deg, #060a12 0%, #070e1b 50%, #060a12 100%);
+
+    padding-top: 200px;
+}
+
+/* Texture/Noise خفيف */
+.aflak-testimonials::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(
+                120deg,
+                rgba(13, 110, 253, 0.72),
+                rgba(0, 0, 0, 0.25) 45%,
+                rgba(246, 193, 14, 0.4)
+            )
+            center center / cover fixed,
+        url(/assets/images/bg-3.png);
+    z-index: -2;
+    pointer-events: none;
+}
+
+/* خط ذهبي خفيف تحت العنوان */
+.aflak-top-glow {
+    height: 2px;
+    width: min(720px, 92%);
+    margin: 18px auto 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 193, 7, 0.9),
+        transparent
+    );
+    filter: drop-shadow(0 0 14px rgba(255, 193, 7, 0.35));
+    opacity: 0.9;
+}
+
+/* ===== Heading ===== */
+.aflak-head {
+    text-align: center;
+    margin-bottom: 26px;
+}
+.aflak-head h2 {
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    font-size: clamp(26px, 3.2vw, 44px);
+    margin: 0 0 8px;
+    text-shadow: 0 14px 26px rgba(0, 0, 0, 0.35);
+}
+.aflak-head p {
+    margin: 0 auto;
+    max-width: 850px;
+    color: var(--mut);
+    font-weight: 700;
+    line-height: 1.9;
+    font-size: clamp(14px, 1.6vw, 18px);
+}
+
+/* ===== Slider Shell ===== */
+.aflak-shell {
+    position: relative;
+    max-width: 1140px;
+    margin: 0 auto;
+}
+
+
+.aflak-track {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap; /* مهم */
+    padding: 16px 10px 18px;
+}
+/* على الموبايل نسمح بالسكرول */
+@media (max-width: 991.98px) {
+    .aflak-track {
+        overflow: auto;
+    }
+}
+
+/* ===== Cards (Metal/Glass) ===== */
+.aflak-card {
+    scroll-snap-align: start;
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.08),
+            rgba(255, 255, 255, 0.04)
+        ),
+        radial-gradient(
+            800px 260px at 50% 0%,
+            rgba(13, 110, 253, 0.16),
+            transparent 55%
+        ),
+        rgba(9, 14, 24, 0.68);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
+    transform: translateY(0);
+    transition: transform 0.25s ease, border-color 0.25s ease,
+        box-shadow 0.25s ease;
+            flex: 1 1 calc(33.333% - 24px); /* 3 بطاقات */
+    max-width: calc(33.333% - 24px);
+    min-width: 280px; /* يمنع الانهيار */
+}
+
+/* خط علوي مثل الصورة */
+.aflak-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        var(--accent-color),
+        var(--secondary-color)
+    );
+    opacity: 0.95;
+    z-index: 1;
+}
+
+/* Glow إطار */
+.aflak-card::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: radial-gradient(
+            500px 180px at 20% 0%,
+            rgba(255, 193, 7, 0.22),
+            transparent 60%
+        ),
+        radial-gradient(
+            500px 180px at 85% 0%,
+            rgba(13, 110, 253, 0.18),
+            transparent 60%
+        );
+    pointer-events: none;
+    opacity: 0.9;
+    z-index: 0;
+}
+
+.aflak-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.65);
+}
+
+.aflak-inner {
+    position: relative;
+    z-index: 2;
+    padding: 18px 18px 16px;
+}
+
+/* Stars */
+.aflak-stars {
+    display: flex;
+    gap: 4px;
+    color: var(--af-yellow);
+    filter: drop-shadow(0 10px 16px rgba(255, 193, 7, 0.2));
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+/* Image frame */
+.aflak-photo {
+    width: 100%;
+    height: 150px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.06);
+    position: relative;
+}
+.aflak-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.03);
+    transition: transform 0.35s ease;
+    filter: contrast(1.05) saturate(1.05);
+}
+.aflak-card:hover .aflak-photo img {
+    transform: scale(1.1);
+}
+
+/* Name line */
+.aflak-name {
+    margin: 14px 0 4px;
+    font-weight: 900;
+    font-size: 22px;
+    line-height: 1.3;
+}
+.aflak-meta {
+    margin: 0 0 12px;
+    color: var(--mut);
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.aflak-quote {
+    margin: 0;
+    color: rgba(234, 242, 255, 0.84);
+    line-height: 1.95;
+    font-weight: 650;
+    font-size: 13px;
+}
+
+/* Chips bottom */
+.aflak-chips {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.aflak-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(234, 242, 255, 0.85);
+    font-weight: 900;
+    font-size: 12.5px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+.aflak-chip i {
+    color: var(--af-yellow);
+}
+
+/* ===== Nav Buttons (مثل الأسهم الجانبية) ===== */
+/* .aflak-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(10, 16, 28, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: grid;
+    place-items: center;
+    color: var(--af-yellow);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    cursor: pointer;
+    z-index: 5;
+    transition: transform 0.2s ease, filter 0.2s ease, background 0.2s ease;
+}
+.aflak-nav:hover {
+    transform: translateY(-50%) scale(1.04);
+    filter: brightness(1.08);
+}
+.aflak-nav.prev {
+    right: -8px;
+}
+.aflak-nav.next {
+    left: -8px;
+} */
+
+/* Hide arrows on small screens */
+@media (max-width: 991.98px) {
+    .aflak-nav {
+        display: none;
+    }
+}
+
+/* ===== Dots ===== */
+.aflak-dots {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.aflak-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(13, 110, 253, 0.22);
+    transition: width 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.aflak-dot.is-active {
+    width: 28px;
+    background: linear-gradient(90deg, var(--af-yellow), var(--af-blue));
+    transform: translateY(-1px);
+    box-shadow: 0 0 16px rgba(255, 193, 7, 0.22);
+}
+
+/* ===== Center card emphasis (اختياري) ===== */
+.aflak-card.is-center {
+    border-color: rgba(255, 193, 7, 0.3);
+    box-shadow: 0 30px 100px rgba(0, 0, 0, 0.7);
+}
+
+/* Responsive tuning */
+@media (max-width: 991.98px) {
+    .aflak-card {
+        flex: 1 1 calc(50% - 24px);
+        max-width: calc(50% - 24px);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .aflak-photo {
+        height: 140px;
+    }
+    .aflak-name {
+        font-size: 20px;
+    }
+
+        .aflak-track {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        justify-content: flex-start;
+        scroll-snap-type: x mandatory;
+    }
+
+    .aflak-card {
+        flex: 0 0 85%;
+        max-width: 85%;
+        scroll-snap-align: center;
+    }
+}
+
+
+/* ------------------------ */
+.aflak-shell {
+  overflow: hidden;
+}

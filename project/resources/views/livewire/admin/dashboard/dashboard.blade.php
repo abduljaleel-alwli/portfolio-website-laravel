@@ -90,37 +90,37 @@ new class extends Component {
     md:grid-cols-3
     xl:grid-cols-4
     gap-4">
-        <x-dashboard.card title="Visitors" :value="$metrics['visits']" icon="users" color="sky"
-            :sparkline="$metrics['visits_sparkline'] ?? []" :trend="$metrics['visits_trend']" />
 
-        <x-dashboard.card title="Today Visits" :value="$metrics['today_visits']" icon="calendar-days" color="sky" />
+        <x-dashboard.card :title="__('Visitors')" :value="$metrics['visits']" icon="users" color="sky" :sparkline="$metrics['visits_sparkline'] ?? []"
+            :trend="$metrics['visits_trend']" />
 
+        <x-dashboard.card :title="__('Today Visits')" :value="$metrics['today_visits']" icon="calendar-days" color="sky" />
 
-        <x-dashboard.card title="Contacts" :value="$metrics['contacts']" icon="envelope" color="emerald"
-            :sparkline="$metrics['contacts_sparkline'] ?? []" href="{{ route('admin.contact') }}" />
+        <x-dashboard.card :title="__('Contacts')" :value="$metrics['contacts']" icon="envelope" color="emerald" :sparkline="$metrics['contacts_sparkline'] ?? []"
+            href="{{ route('admin.contact-messages') }}" />
 
-        <x-dashboard.card title="Today Contacts" :value="$metrics['today_contacts']" icon="inbox" color="emerald" />
-
+        <x-dashboard.card :title="__('Today Contacts')" :value="$metrics['today_contacts']" icon="inbox" color="emerald" />
 
         @role('super-admin')
-        <x-dashboard.card title="Users" :value="$metrics['users']" icon="shield-check" color="violet"
-            href="{{ route('admin.users') }}" />
-        <x-dashboard.card title="System Status" :value="$metrics['dashboard_health'] ? __('Active') : __('Idle')"
-            icon="signal" color="{{ $metrics['dashboard_health'] ? 'emerald' : 'rose' }}" />
+            <x-dashboard.card :title="__('Users')" :value="$metrics['users']" icon="shield-check" color="violet"
+                href="{{ route('admin.users') }}" />
+
+            <x-dashboard.card :title="__('System Status')" :value="$metrics['dashboard_health'] ? __('Active') : __('Idle')" icon="signal"
+                color="{{ $metrics['dashboard_health'] ? 'emerald' : 'rose' }}" />
         @endrole
 
-        <x-dashboard.card title="Products" :value="$metrics['products']" icon="cube" color="amber"
+        <x-dashboard.card :title="__('Products')" :value="$metrics['products']" icon="cube" color="amber"
             href="{{ route('admin.products') }}" />
 
-        <x-dashboard.card title="WhatsApp Clicks" :value="$metrics['whatsapp_clicks']" icon="chat-bubble-left-right"
-            color="green" />
+        <x-dashboard.card :title="__('WhatsApp Clicks')" :value="$metrics['whatsapp_clicks']" icon="chat-bubble-left-right" color="green" />
 
-        <x-dashboard.card title="Social Clicks" :value="$metrics['social_clicks']" icon="share" color="indigo" />
+        <x-dashboard.card :title="__('Social Clicks')" :value="$metrics['social_clicks']" icon="share" color="indigo" />
 
-        <x-dashboard.card title="Conversion Rate" :value="$metrics['conversion_rate'] . '%'" icon="arrow-trending-up"
-            color="rose" :trend="$metrics['conversion_trend'] ?? 0" />
+        <x-dashboard.card :title="__('Conversion Rate')" :value="$metrics['conversion_rate'] . '%'" icon="arrow-trending-up" color="rose"
+            :trend="$metrics['conversion_trend'] ?? 0" />
 
     </div>
+
 
     <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-5">
         <div class="flex items-center justify-between gap-3 mb-4">
@@ -155,7 +155,8 @@ new class extends Component {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {{-- Top Pages --}}
-        <div class="rounded-2xl border border-slate-200 dark:border-slate-800
+        <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800
                bg-white dark:bg-slate-900/90 p-5">
 
             {{-- Header --}}
@@ -181,7 +182,8 @@ new class extends Component {
                     @endfor
                 @else
                     @foreach ($metrics['top_pages'] as $page)
-                        <li class="flex items-center justify-between gap-3
+                        <li
+                            class="flex items-center justify-between gap-3
                                                rounded-lg px-2 py-2
                                                hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
 
@@ -189,7 +191,8 @@ new class extends Component {
                                 {{ $page->page }}
                             </span>
 
-                            <span class="min-w-[42px] text-center
+                            <span
+                                class="min-w-[42px] text-center
                                                    px-2 py-0.5 rounded-md text-xs font-semibold
                                                    bg-slate-100 dark:bg-slate-800">
                                 {{ $page->visits }}
@@ -203,7 +206,8 @@ new class extends Component {
         </div>
 
         {{-- Notifications Quick View --}}
-        <div class="rounded-2xl border border-slate-200 dark:border-slate-800
+        <div
+            class="rounded-2xl border border-slate-200 dark:border-slate-800
                bg-white dark:bg-slate-900/90 p-5">
 
             {{-- Header --}}
@@ -243,10 +247,12 @@ new class extends Component {
                     @foreach ($metrics['notifications'] as $notification)
                         @php $unread = is_null($notification->read_at); @endphp
 
-                        <li class="flex items-start gap-3 rounded-lg px-2 py-2
+                        <li
+                            class="flex items-start gap-3 rounded-lg px-2 py-2
                                                hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
 
-                            <span class="mt-1.5 w-2 h-2 rounded-full
+                            <span
+                                class="mt-1.5 w-2 h-2 rounded-full
                                                    {{ $unread ? 'bg-emerald-500' : 'bg-slate-300' }}">
                             </span>
 
@@ -321,9 +327,9 @@ new class extends Component {
 
 
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <script data-page-style src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-        <script>
+        <script data-page-style>
             document.addEventListener('livewire:init', () => {
                 const el = document.querySelector('#visitsChart');
                 if (!el) return;
