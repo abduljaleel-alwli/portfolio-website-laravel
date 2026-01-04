@@ -129,7 +129,36 @@ new class extends Component {
                 </div>
             </article>
 
+                 <!-- Card 3 -->
+            <article class="aflak-card">
+                <div class="aflak-inner">
+                    <div class="aflak-stars" aria-label="تقييم 5 من 5">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                            class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                            class="fa-solid fa-star"></i>
+                    </div>
 
+                    <div class="aflak-photo">
+                        <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1200&auto=format&fit=crop"
+                            alt="عميل 3">
+                    </div>
+
+                    <h3 class="aflak-name">علي — صاحب ورشة</h3>
+                    <p class="aflak-meta">قص وتجهيز حسب الطلب</p>
+
+                    <p class="aflak-quote ">
+                        “خدمة القص ممتازة—المقاسات طلعت دقيقة وقل الهدر بشكل واضح. أنصح فيهم.”
+                    </p>
+
+                    <div class="aflak-chips">
+                        <span class="aflak-chip"><i class="fa-solid fa-scissors"></i> قص</span>
+                        <span class="aflak-chip"><i class="fa-solid fa-cube"></i> تجهيز</span>
+                        <span class="aflak-chip"><i class="fa-solid fa-thumbs-up"></i> ثقة</span>
+                    </div>
+                </div>
+            </article>
+            
+            
             <!-- Card 1 -->
             <article class="aflak-card">
                 <div class="aflak-inner">
@@ -160,6 +189,7 @@ new class extends Component {
                 </div>
             </article>
 
+                   
             <!-- Card 2 (Center) -->
             <article class="aflak-card">
                 <div class="aflak-inner">
@@ -189,34 +219,7 @@ new class extends Component {
                 </div>
             </article>
 
-            <!-- Card 3 -->
-            <article class="aflak-card">
-                <div class="aflak-inner">
-                    <div class="aflak-stars" aria-label="تقييم 5 من 5">
-                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
-                            class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
-                            class="fa-solid fa-star"></i>
-                    </div>
 
-                    <div class="aflak-photo">
-                        <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1200&auto=format&fit=crop"
-                            alt="عميل 3">
-                    </div>
-
-                    <h3 class="aflak-name">علي — صاحب ورشة</h3>
-                    <p class="aflak-meta">قص وتجهيز حسب الطلب</p>
-
-                    <p class="aflak-quote ">
-                        “خدمة القص ممتازة—المقاسات طلعت دقيقة وقل الهدر بشكل واضح. أنصح فيهم.”
-                    </p>
-
-                    <div class="aflak-chips">
-                        <span class="aflak-chip"><i class="fa-solid fa-scissors"></i> قص</span>
-                        <span class="aflak-chip"><i class="fa-solid fa-cube"></i> تجهيز</span>
-                        <span class="aflak-chip"><i class="fa-solid fa-thumbs-up"></i> ثقة</span>
-                    </div>
-                </div>
-            </article>
         </div>
 
         {{-- <button class="aflak-nav next" type="button" aria-label="التالي" wire:click="next">

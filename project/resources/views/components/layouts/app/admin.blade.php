@@ -11,7 +11,7 @@
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
         {{-- Logo --}}
-        <a href="{{ route('admin.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse"
+        <a href="{{ route('admin.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse admin-logo-box"
             wire:navigate>
             <x-app-logo />
         </a>

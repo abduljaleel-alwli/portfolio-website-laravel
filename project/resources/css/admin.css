@@ -173,3 +173,45 @@ body[data-theme='dark'] .data-current\:text-\(--color-accent-content\)[data-curr
 div[data-flux-main]{
     background-color: var(--v-color-theme-background-primary);
 }
+
+/* Admin logo */
+.admin-logo{
+    filter: drop-shadow(0 8px 29px #ffff);
+}
+
+.admin-logo-box {
+    margin: 0 15px;
+    padding: 10px 0;
+}
+
+.admin-logo-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+
+    background: #ffffff; /* ✅ أبيض فقط هنا */
+    border-radius: 16px; /* انحناء مثل الصورة */
+
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.06));
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    
+    color: #071225 !important;
+    z-index: 2;
+
+    color: var(--background-color) !important;
+    letter-spacing: 0.2px;
+    /* box-shadow: -8px 0 18px rgba(255, 255, 255, 0.35); */
+
+    font-size: 25px !important;
+}
+
+.admin-logo-box div{
+    color: var(--v-color-accent)
+}
+
+.admin-logo-box span{
+    font-size: 17px;
+}
