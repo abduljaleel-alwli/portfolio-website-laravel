@@ -496,6 +496,11 @@ body {
     border-radius: 12px;
     border: 1px solid rgba(255, 193, 7, 0.3);
     border-color: var(--accent-color);
+    line-height: 1.6;
+}
+
+.meta-box p{
+    line-height: 1.9;
 }
 
 .modal-title {
@@ -688,4 +693,8 @@ body {
 .lw-slider input:nth-of-type(5):checked ~ .lw-dots label:nth-child(5),
 .lw-slider input:nth-of-type(6):checked ~ .lw-dots label:nth-child(6) {
     background: var(--accent-color);
+}
+
+p {
+    line-height: 1.6;
 }

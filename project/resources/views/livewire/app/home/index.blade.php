@@ -21,7 +21,7 @@ new class extends Component {
     <div class="preloader">
         <div class="loading-container">
             <div class="loading"></div>
-            <div id="loading-icon" class="accent-bg-color rounded-circle">
+            <div id="loading-icon" class="rounded-circle">
                 <x-app-logo-icon width="100px" />
             </div>
 

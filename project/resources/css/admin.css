@@ -64,6 +64,61 @@ textarea:focus[data-flux-control],
 select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
+/* ===============================
+   Global Form Inputs – Pro Style
+   Light + Dark
+================================ */
+
+input,
+textarea,
+select {
+    @apply
+        w-full
+        rounded-lg
+        border
+        border-zinc-300
+        bg-white
+        text-zinc-900
+        placeholder:text-zinc-400
+        transition
+        duration-200
+        p-2
+        ease-out;
+}
+
+/* Dark mode base */
+.dark input,
+.dark textarea,
+.dark select {
+    @apply
+        border-zinc-600
+        bg-slate-700
+        text-slate-100
+        placeholder:text-slate-500;
+}
+
+/* Focus state */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    @apply
+        outline-none
+        ring-1
+        ring-accent/70
+        border-accent
+        ring-offset-2
+        ring-offset-white;
+}
+
+/* Dark focus */
+.dark input:focus-visible,
+.dark textarea:focus-visible,
+.dark select:focus-visible {
+    @apply
+        ring-offset-zinc-900
+        border-accent/80;
+}
+
 
 /* ===============================
    Accent helpers
