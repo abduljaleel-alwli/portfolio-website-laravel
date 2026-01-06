@@ -11,8 +11,8 @@
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
         {{-- Logo --}}
-        <a href="{{ route('admin.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse admin-logo-box"
-            wire:navigate>
+        <a href="{{ route('admin.dashboard') }}"
+            class="me-5 flex items-center space-x-2 rtl:space-x-reverse admin-logo-box" wire:navigate>
             <x-app-logo />
         </a>
 
@@ -46,8 +46,7 @@
                     <div class="relative flex items-center gap-2">
                         <span>{{ __('Notifications') }}</span>
 
-                        <x-notifications.notification-badge
-                            :count="\Illuminate\Notifications\DatabaseNotification::whereNull('read_at')->count()" />
+                        <x-notifications.notification-badge :count="\Illuminate\Notifications\DatabaseNotification::whereNull('read_at')->count()" />
                     </div>
                 </flux:navlist.item>
 
@@ -57,8 +56,7 @@
                     <div class="relative flex items-center gap-2">
                         <span>{{ __('Messages') }}</span>
 
-                        <x-notifications.notification-badge
-                            :count="\App\Models\ContactMessage::whereNull('read_at')->count()" />
+                        <x-notifications.notification-badge :count="\App\Models\ContactMessage::whereNull('read_at')->count()" />
                     </div>
 
                 </flux:navlist.item>
@@ -90,15 +88,15 @@
         <flux:navlist variant="outline">
 
             @role('super-admin')
-            <flux:navlist.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')"
-                wire:navigate>
-                {{ __('Users') }}
-            </flux:navlist.item>
+                <flux:navlist.item icon="users" :href="route('admin.users')"
+                    :current="request()->routeIs('admin.users')" wire:navigate>
+                    {{ __('Users') }}
+                </flux:navlist.item>
 
-            <flux:navlist.item icon="clipboard-document-list" :href="route('admin.audit-logs')"
-                :current="request()->routeIs('admin.audit-logs')" wire:navigate>
-                {{ __('System Logs') }}
-            </flux:navlist.item>
+                <flux:navlist.item icon="clipboard-document-list" :href="route('admin.audit-logs')"
+                    :current="request()->routeIs('admin.audit-logs')" wire:navigate>
+                    {{ __('System Logs') }}
+                </flux:navlist.item>
             @endrole
 
             <flux:navlist.item icon="cog-6-tooth" :href="route('admin.settings')"
@@ -106,11 +104,32 @@
                 {{ __('Settings') }}
             </flux:navlist.item>
 
-            <flux:navlist.item icon="chat-bubble-left-right"
-                href="https://api.whatsapp.com/send/?phone=000000000&text=Hello%2C+I+need+help.&type=phone_number&app_absent=0"
-                target="_blank">
-                {{ __('Dev Support') }}
-            </flux:navlist.item>
+            @php
+                $developerSupportCta = data_get($platformConfig, 'cta.developer_support.actions.0');
+                $locale = app()->getLocale();
+            @endphp
+
+
+            @if ($developerSupportCta && ($developerSupportCta['enabled'] ?? false))
+                <flux:navlist.item
+                    icon="chat-bubble-left-right"
+                    href="{{ $developerSupportCta['action']['url'] }}"
+                    target="_blank">
+
+                    {{ 
+                        data_get($developerSupportCta, "label.$locale")
+                        ?? data_get($developerSupportCta, 'label.ar')
+                        ?? __('Dev Support')
+                    }}
+
+                </flux:navlist.item>
+            @else
+                {{-- Skeleton Placeholder --}}
+                <div class="flex items-center gap-2 px-3 py-2">
+                    <x-skeleton.line w="w-5" h="h-5" />
+                    <x-skeleton.line w="w-28" h="h-4" />
+                </div>
+            @endif
 
         </flux:navlist>
 
@@ -124,7 +143,8 @@
                 <flux:menu.radio.group>
                     <div class="p-0 text-sm font-normal">
                         <div class="flex items-center gap-2 px-1 py-1.5">
-                            <span class="flex h-8 w-8 items-center justify-center rounded-lg
+                            <span
+                                class="flex h-8 w-8 items-center justify-center rounded-lg
                                      bg-neutral-200 dark:bg-neutral-700">
                                 {{ auth()->user()->initials() }}
                             </span>
