@@ -43,8 +43,8 @@
                     {{ settings('site_name', 'اسم الموقع') }}
                 </a>
 
-                <a class="d-flex align-items-center gap-2 fw-bold text-light fs-3 opacity-0" style="pointer-events: none"
-                    href="{{ route('home') }}">
+                <a class="d-flex align-items-center gap-2 fw-bold text-light fs-3 opacity-0"
+                    style="pointer-events: none" href="{{ route('home') }}">
 
                     <span class="logo-wrap">
 
@@ -211,7 +211,9 @@
                 </div>
 
                 <div class="col-md-3 mb-4 text-center">
-                    <x-app-logo-icon width="110" class="mb-3" />
+                    {{-- <x-app-logo-icon width="110" class="mb-3" /> --}}
+                    <img src="{{ asset('logo-white.png') }}" width="110" alt="{{ __('Site logo') }}"
+                        {{ $attributes->merge(['class' => 'h-8']) }}>
                     <p class="small">
                         {{ $settings['site_description'] }}
                     </p>

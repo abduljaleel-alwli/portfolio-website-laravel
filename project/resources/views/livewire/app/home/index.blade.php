@@ -72,7 +72,7 @@ new class extends Component {
                 <div class="col-xl-8 col-md-6">
                     <div class="hero-content ms-5">
                         <div class="section-title">
-                            <h1 class="text-light" data-cursor="-opaque">
+                            <h1 class="text-light accent-color" data-cursor="-opaque">
                                 أفلاك للفولاذ <br>
                             </h1>
                             <h3 class="mt-3"> مواد البناء التي يعتمد عليها مشروعك </h3>
@@ -180,7 +180,7 @@ new class extends Component {
                         <div class="about-us-image-box-2">
                             <div class="about-us-image">
                                 <figure class="image-anime">
-                                    <img src="{{ asset('assets/images/home-2/aflak_021.png') }}" alt="">
+                                    <img src="{{ asset('assets/images/home-2/aflak_014.png') }}" alt="">
                                 </figure>
                             </div>
                             <div class="year-experience-circle accent-bg-color">
@@ -580,7 +580,7 @@ new class extends Component {
     <div class="col-12">
         <div class="d-flex flex-column align-items-center gap-2 py-4">
             <!-- Top row -->
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3 our-products-section">
                 <!-- Avatars -->
                 <div class="d-flex align-items-center position-relative">
                     <img src="{{ asset('storage/' . $settings['branding.logo']) }}" alt="{{ $settings['site_name'] }}" class="rounded-circle border border-2 border-white bg-white"

@@ -2552,6 +2552,11 @@ a:focus {
         padding: 50px 0;
     }
 
+    .our-products-section {
+        flex-direction: column;
+        text-align: center;
+    }
+
     .service-item {
         gap: 15px;
     }
