@@ -1,1 +1,1 @@
-  <link rel="stylesheet" href="/assets/css/clients.css">
+  <link rel="stylesheet" href="{{ asset('assets/css/clients.css') }}">

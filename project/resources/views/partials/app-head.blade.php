@@ -38,7 +38,7 @@
     @include('partials.clients.head')
 @endif
 
-<link data-page-style rel="stylesheet" href="/assets/css/mousecursor.css">
+<link data-page-style rel="stylesheet" href="{{ asset('assets/css/mousecursor.css') }}">
 
 <style>
     :root {
@@ -69,7 +69,7 @@
 
     @font-face {
         font-family: "Almarai-Regular";
-        src: url("/assets/fonts/Almarai-Regular.ttf") format("truetype");
+        src: url("{{ asset('assets/fonts/Almarai-Regular.ttf') }}") format("truetype");
         font-weight: normal;
         font-style: normal;
     }

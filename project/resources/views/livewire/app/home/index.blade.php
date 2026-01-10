@@ -30,7 +30,7 @@ new class extends Component {
     <!-- Preloader End -->
     <!-- Hero Section Start -->
     <div id="top" class="hero dark-section parallaxie"
-        style="background-image: url({{ asset('/assets/images/home/hero-bg-image.jpg') }}); background-size: cover; background-repeat: no-repeat; background-attachment: fixed; background-position: center;">
+        style="background-image: url({{ asset('/assets/images/home-2/aflak_042.png') }}); background-size: cover; background-repeat: no-repeat; background-attachment: fixed; background-position: center;">
         <div class="container">
             <div class="row align-items-center flex-row-reverse">
                 <div class="col-xl-4 col-md-6">
@@ -68,10 +68,6 @@ new class extends Component {
                             </div>
                         </div>
                     </div>
-
-                    {{-- <div class="year-experience-circle">
-                        <x-app-logo-icon class="accent-bg-color"/>
-                    </div> --}}
                 </div>
                 <div class="col-xl-8 col-md-6">
                     <div class="hero-content ms-5">
@@ -117,39 +113,39 @@ new class extends Component {
                             </div>
                             <div class="hero-info-image">
                                 <figure class="image-anime reveal">
-                                    <img src="/assets/images/home/hero-info-image-1.jpg" alt="">
+                                    <img src="{{ asset('assets/images/home-2/aflak_042.png') }}" alt="">
                                 </figure>
                             </div>
                         </div>
                         <div class="hero-info-item box-2">
                             <figure class="image-anime reveal">
-                                <img src="/assets/images/home/hero-info-image-2.jpg" alt="">
+                                <img src="{{ asset('assets/images/home-2/aflak_034.png') }}" alt="">
                             </figure>
                         </div>
-                        <div class="hero-info-item box-3">
+                        <div class="hero-info-item box-3"> 
                             <div class="hero-info-header">
                                 <div class="icon-box">
-                                    <img src="/assets/images/home/icon-hero-info-1.svg" alt="">
+                                    <img src="{{ asset('assets/images/home/icon-hero-info-1.svg') }}" alt="">
                                 </div>
                                 <div class="satisfy-client-images">
                                     <div class="satisfy-client-image">
-                                        <figure class="image-anime"><img src="/assets/images/home/author-1.jpg"
+                                        <figure class="image-anime"><img src="{{ asset('assets/images/home-2/aflak_007.png') }}"
                                                 alt=""></figure>
                                     </div>
                                     <div class="satisfy-client-image">
-                                        <figure class="image-anime"><img src="/assets/images/home/author-2.jpg"
+                                        <figure class="image-anime"><img src="{{ asset('assets/images/home-2/aflak_010.png') }}"
                                                 alt=""></figure>
                                     </div>
                                     <div class="satisfy-client-image">
-                                        <figure class="image-anime"><img src="/assets/images/home/author-3.jpg"
+                                        <figure class="image-anime"><img src="{{ asset('assets/images/home-2/aflak_009.png') }}"
                                                 alt=""></figure>
                                     </div>
                                     <div class="satisfy-client-image">
-                                        <figure class="image-anime"><img src="/assets/images/home/author-4.jpg"
+                                        <figure class="image-anime"><img src="{{ asset('assets/images/home-2/aflak_029.png') }}"
                                                 alt=""></figure>
                                     </div>
                                     <div class="satisfy-client-image">
-                                        <figure class="image-anime"><img src="/assets/images/home/author-5.jpg"
+                                        <figure class="image-anime"><img src="{{ asset('assets/images/home-2/aflak_031.png') }}"
                                                 alt=""></figure>
                                     </div>
                                 </div>
@@ -159,7 +155,7 @@ new class extends Component {
                                 <h2><span class="counter">15</span>K+</h2>
                             </div>
                             <div class="hero-info-bg-icon">
-                                <img src="/assets/images/home/icon-hero-info-bg-1.svg" alt="">
+                                <img src="{{ asset('assets/images/home/icon-hero-info-bg-1.svg') }}" alt="">
                             </div>
                         </div>
                     </div>
@@ -177,14 +173,14 @@ new class extends Component {
                         <div class="about-us-image-box-1">
                             <div class="about-us-image">
                                 <figure class="image-anime">
-                                    <img src="/assets/images/home/about-us-image-1.jpg" alt="">
+                                    <img src="{{ asset('assets/images/home-2/aflak_033.png') }}" alt="">
                                 </figure>
                             </div>
                         </div>
                         <div class="about-us-image-box-2">
                             <div class="about-us-image">
                                 <figure class="image-anime">
-                                    <img src="/assets/images/home/about-us-image-2.jpg" alt="">
+                                    <img src="{{ asset('assets/images/home-2/aflak_021.png') }}" alt="">
                                 </figure>
                             </div>
                             <div class="year-experience-circle accent-bg-color">
@@ -206,7 +202,7 @@ new class extends Component {
                         <div class="about-us-body wow fadeInUp  " data-wow-delay="0.4s">
                             <div class="about-body-item ">
                                 <div class="icon-box">
-                                    <img src="/assets/images/home/icon-about-item-1.svg" alt="">
+                                    <img src="{{ asset('assets/images/home/icon-about-item-1.svg') }}" alt="">
                                 </div>
                                 <div class="about-body-item-content">
                                     <h3>جودة ومواصفة</h3>
@@ -215,7 +211,7 @@ new class extends Component {
                             </div>
                             <div class="about-body-item">
                                 <div class="icon-box">
-                                    <img src="/assets/images/home/icon-about-item-2.svg" alt="">
+                                    <img src="{{ asset('assets/images/home/icon-about-item-2.svg') }}" alt="">
                                 </div>
                                 <div class="about-body-item-content">
                                     <h3>سرعة التجهيز والتسليم</h3>
@@ -233,13 +229,13 @@ new class extends Component {
                                     </ul>
                                 </div>
                                 <div class="about-us-btn ms-2">
-                                    <a href="./content.html" class="btn-default">تواصل معنا</a>
+                                    <a wire:navigate href="{{ route('contact') }}" class="btn-default">تواصل معنا</a>
                                 </div>
                             </div>
                             <div class="about-us-video-box">
                                 <div class="about-video-image">
                                     <figure class="image-anime">
-                                        <img src="/assets/images/home/about-intro-video-image.jpg" alt="">
+                                        <img src="{{ asset('assets/images/home-2/aflak_013.png') }}" alt="">
                                     </figure>
                                 </div>
                             </div>
@@ -267,7 +263,7 @@ new class extends Component {
                 <div class="col-xl-4 col-md-6 order-1">
                     <div class="feature-item box-1 wow fadeInUp">
                         <div class="feature-item-shape-image">
-                            <figure><img src="/assets/images/home/feature-item-image-1.jpg" alt=""></figure>
+                            <figure><img src="{{ asset('assets/images/home-2/aflak_024.png') }}" alt=""></figure>
                         </div>
                         <div class="feature-item-content-box">
                             <div class="feature-item-content">
@@ -299,7 +295,7 @@ new class extends Component {
                             </div>
                         </div>
                         <div class="feature-item-image">
-                            <figure><img src="/assets/images/home/feature-item-image-2.png" alt=""></figure>
+                            <figure><img src="{{ asset('assets/images/home/feature-item-image-2.png') }}" alt=""></figure>
                         </div>
                     </div>
                 </div>
@@ -345,7 +341,7 @@ new class extends Component {
                     <div class="post-item wow fadeInUp">
                         <div class="post-featured-image">
                             <a wire:navigate href="{{ route('products') }}" data-cursor-text="عرض">
-                                <figure><img src="/assets/images/home/post-1.jpg" alt=""></figure>
+                                <figure><img src="{{ asset('assets/images/home-2/aflak_043.png') }}" alt=""></figure>
                             </a>
                         </div>
                         <div class="post-item-tags"><a wire:navigate href="{{ route('contact') }}">حديد</a></div>
@@ -366,7 +362,7 @@ new class extends Component {
                     <div class="post-item wow fadeInUp" data-wow-delay="0.2s">
                         <div class="post-featured-image">
                             <a wire:navigate href="{{ route('products') }}" data-cursor-text="عرض">
-                                <figure><img src="/assets/images/home/post-2.jpg" alt=""></figure>
+                                <figure><img src="{{ asset('assets/images/home-2/aflak_005.png') }}" alt=""></figure>
                             </a>
                         </div>
                         <div class="post-item-tags"><a wire:navigate href="{{ route('contact') }}">مواسير</a></div>
@@ -387,7 +383,7 @@ new class extends Component {
                     <div class="post-item wow fadeInUp" data-wow-delay="0.4s">
                         <div class="post-featured-image">
                             <a wire:navigate href="{{ route('products') }}" data-cursor-text="عرض">
-                                <figure><img src="/assets/images/home/post-3.jpg" alt=""></figure>
+                                <figure><img src="{{ asset('assets/images/home-2/aflak_024.png') }}" alt=""></figure>
                             </a>
                         </div>
                         <div class="post-item-tags"><a wire:navigate href="{{ route('contact') }}">صفائح</a></div>
@@ -473,7 +469,7 @@ new class extends Component {
 
                             {{-- زر المزيد --}}
                             <a wire:navigate href="{{ route('products') }}">
-                                <li style="background: var(--secondary-color); color: var(--accent-color); border: 1px solid var(--accent-color);">
+                                <li style="background: var(--secondary-color); color: var(--accent-color); border: 2px solid var(--accent-color);">
                                     المزيد
                                 </li>
                             </a>
@@ -497,11 +493,11 @@ new class extends Component {
                         <div class="service-image-box">
                             <div class="service-item-image">
                                 <figure class="image-anime">
-                                    <img src="/assets/images/home/service-image-1.jpg" alt="">
+                                    <img src="{{ asset('assets/images/home-2/aflak_044.png') }}" alt="">
                                 </figure>
                             </div>
                             <div class="service-item-btn">
-                                <a wire:navigate href="{{ route('contact') }}"><img src="/assets/images/home/arrow-primary.svg"
+                                <a wire:navigate href="{{ route('contact') }}"><img src="{{ asset('assets/images/home/arrow-primary.svg') }}"
                                         alt=""></a>
                             </div>
                         </div>
@@ -520,11 +516,11 @@ new class extends Component {
                         <div class="service-image-box">
                             <div class="service-item-image">
                                 <figure class="image-anime">
-                                    <img src="/assets/images/home/service-image-2.jpg" alt="">
+                                    <img src="{{ asset('assets/images/home-2/aflak_007.png') }}" alt="">
                                 </figure>
                             </div>
                             <div class="service-item-btn">
-                                <a wire:navigate href="{{ route('contact') }}"><img src="/assets/images/home/arrow-primary.svg"
+                                <a wire:navigate href="{{ route('contact') }}"><img src="{{ asset('assets/images/home/arrow-primary.svg') }}"
                                         alt=""></a>
                             </div>
                         </div>
@@ -543,11 +539,11 @@ new class extends Component {
                         <div class="service-image-box">
                             <div class="service-item-image">
                                 <figure class="image-anime">
-                                    <img src="/assets/images/home/service-image-3.jpg" alt="">
+                                    <img src="{{ asset('assets/images/home-2/aflak_045.png') }}" alt="">
                                 </figure>
                             </div>
                             <div class="service-item-btn">
-                                <a wire:navigate href="{{ route('contact') }}"><img src="/assets/images/home/arrow-primary.svg"
+                                <a wire:navigate href="{{ route('contact') }}"><img src="{{ asset('assets/images/home/arrow-primary.svg') }}"
                                         alt=""></a>
                             </div>
                         </div>
@@ -566,11 +562,11 @@ new class extends Component {
                         <div class="service-image-box">
                             <div class="service-item-image">
                                 <figure class="image-anime">
-                                    <img src="/assets/images/home/service-image-4.jpg" alt="">
+                                    <img src="{{ asset('assets/images/home-2/aflak_046.png') }}" alt="">
                                 </figure>
                             </div>
                             <div class="service-item-btn">
-                                <a wire:navigate href="{{ route('contact') }}"><img src="/assets/images/home/arrow-primary.svg"
+                                <a wire:navigate href="{{ route('contact') }}"><img src="{{ asset('assets/images/home/arrow-primary.svg') }}"
                                         alt=""></a>
                             </div>
                         </div>
@@ -587,11 +583,11 @@ new class extends Component {
             <div class="d-flex align-items-center gap-3">
                 <!-- Avatars -->
                 <div class="d-flex align-items-center position-relative">
-                    <img src="/assets/images/home/author-1.jpg" class="rounded-circle border border-2 border-white"
+                    <img src="{{ asset('storage/' . $settings['branding.logo']) }}" alt="{{ $settings['site_name'] }}" class="rounded-circle border border-2 border-white bg-white"
                         width="38" height="38" alt="client">
                     <div class="rounded-circle accent-bg-color d-flex align-items-center justify-content-center border border-2 border-white ms-n2"
                         style="width:38px;height:38px;">
-                        <img src="/assets/images/home/icon-phone-primary.svg" width="16" alt="phone">
+                        <img src="{{ asset('assets/images/home/icon-phone-primary.svg') }}" width="16" alt="phone">
                     </div>
                 </div>
                 <!-- Text -->

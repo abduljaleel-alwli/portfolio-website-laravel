@@ -739,7 +739,8 @@ a:focus {
 
 .satisfy-client-image figure img {
     width: 100%;
-    max-width: 48px;
+    height: 44px;
+    max-width: 49px;
     border-radius: 50%;
 }
 
@@ -2553,10 +2554,6 @@ a:focus {
 
     .service-item {
         gap: 15px;
-    }
-
-    .service-benefit-box {
-        margin-top: 10px;
     }
 
     .service-benefit-list ul {
