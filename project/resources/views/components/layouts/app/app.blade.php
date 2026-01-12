@@ -212,7 +212,7 @@
 
                 <div class="col-md-3 mb-4 text-center">
                     {{-- <x-app-logo-icon width="110" class="mb-3" /> --}}
-                    <img src="{{ asset('logo-white.png') }}" width="110" alt="{{ __('Site logo') }}"
+                    <img src="{{ asset('logo-white-2.png') }}" width="110" alt="{{ __('Site logo') }}"
                         {{ $attributes->merge(['class' => 'h-8']) }}>
                     <p class="small">
                         {{ $settings['site_description'] }}
