@@ -65,7 +65,22 @@ new class extends Component {
                 'email_subject' => ['required', 'string', 'max:255'],
                 'social_links' => ['array'],
                 'social_links.*.platform' => ['required', 'string', 'max:50'],
-                'social_links.*.url' => ['required', 'url', 'max:500'],
+                'social_links.*.url' => [
+                    'required', 
+                    'string', 
+                    'max:500',
+                    function ($attribute, $value, $fail) {
+                        // التحقق مما إذا كان رابطاً عادياً
+                        $isUrl = filter_var($value, FILTER_VALIDATE_URL);
+                        
+                        // التحقق مما إذا كان يبدأ بـ mailto: ويحتوي على بريد إلكتروني صالح
+                        $isMailto = str_starts_with($value, 'mailto:') && filter_var(substr($value, 7), FILTER_VALIDATE_EMAIL);
+
+                        if (!$isUrl && !$isMailto) {
+                            $fail(__('يجب أن يكون الرابط صحيحاً أو رابط بريد إلكتروني (mailto).'));
+                        }
+                    }
+                ],
                 'social_links.*.icon_type' => ['required', 'in:class,svg'],
                 'social_links.*.icon_value' => ['required', 'string'],
             ]);
