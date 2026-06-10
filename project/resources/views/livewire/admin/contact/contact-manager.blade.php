@@ -272,7 +272,7 @@ new class extends Component {
             @forelse ($social_links as $index => $social)
                 <div
                     class="rounded-xl border border-slate-200 dark:border-slate-800
-                            bg-slate-50 dark:bg-slate-800/40">
+                             bg-slate-50 dark:bg-slate-800/40">
 
                     <div
                         class="flex items-center justify-between px-4 py-3 border-b
@@ -296,13 +296,21 @@ new class extends Component {
                             <div>
                                 <label class="block text-xs text-slate-500 mb-1">{{ __('Platform') }}</label>
                                 <input wire:model.defer="social_links.{{ $index }}.platform"
-                                    class="input w-full" placeholder="facebook / whatsapp" />
+                                    class="input w-full @error('social_links.' . $index . '.platform') ring-1 ring-red-500 @enderror" 
+                                    placeholder="facebook / whatsapp" />
+                                @error('social_links.' . $index . '.platform')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div>
                                 <label class="block text-xs text-slate-500 mb-1">{{ __('URL') }}</label>
-                                <input wire:model.defer="social_links.{{ $index }}.url" class="input w-full"
+                                <input wire:model.defer="social_links.{{ $index }}.url" 
+                                    class="input w-full @error('social_links.' . $index . '.url') ring-1 ring-red-500 @enderror"
                                     placeholder="https://..." />
+                                @error('social_links.' . $index . '.url')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -310,16 +318,23 @@ new class extends Component {
                             <div>
                                 <label class="block text-xs text-slate-500 mb-1">{{ __('Icon type') }}</label>
                                 <select wire:model.live="social_links.{{ $index }}.icon_type"
-                                    class="input w-full">
+                                    class="input w-full @error('social_links.' . $index . '.icon_type') ring-1 ring-red-500 @enderror">
                                     <option value="class">{{ __('Font Awesome class') }}</option>
                                     <option value="svg">{{ __('SVG code') }}</option>
                                 </select>
+                                @error('social_links.' . $index . '.icon_type')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div>
                                 <label class="block text-xs text-slate-500 mb-1">{{ __('Icon value') }}</label>
-                                <textarea wire:model.live="social_links.{{ $index }}.icon_value" class="textarea w-full font-mono text-xs"
+                                <textarea wire:model.live="social_links.{{ $index }}.icon_value" 
+                                    class="textarea w-full font-mono text-xs @error('social_links.' . $index . '.icon_value') ring-1 ring-red-500 @enderror"
                                     rows="2" placeholder="{{ __('Icon class or SVG code') }}"></textarea>
+                                @error('social_links.' . $index . '.icon_value')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
